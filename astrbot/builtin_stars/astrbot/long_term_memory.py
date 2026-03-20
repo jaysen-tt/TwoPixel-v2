@@ -285,7 +285,7 @@ class LongTermMemory:
         if not text:
             return
         records = self._load_distilled_records(umo)
-        digest = hashlib.sha1(f"{role}:{text}".encode("utf-8")).hexdigest()[:20]
+        digest = hashlib.sha1(f"{role}:{text}".encode()).hexdigest()[:20]
         if records and records[-1].get("id") == digest:
             return
         record = {

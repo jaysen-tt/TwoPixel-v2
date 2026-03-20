@@ -1,8 +1,7 @@
-from pathlib import Path
 import subprocess
+from pathlib import Path
 
 from PIL import Image, ImageDraw
-
 
 ROOT = Path("/Users/jaysen/Desktop/cb")
 SRC_SVG = ROOT / "logo.svg"

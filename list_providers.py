@@ -1,6 +1,6 @@
 import json
 
-with open("data/cmd_config.json", "r", encoding="utf-8-sig") as f:
+with open("data/cmd_config.json", encoding="utf-8-sig") as f:
     config = json.load(f)
 
 print("Provider Sources:")

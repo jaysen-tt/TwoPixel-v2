@@ -6,9 +6,6 @@ import aiohttp
 import jwt
 from quart import request
 
-from astrbot import logger
-from astrbot.core import DEMO_MODE
-
 from .route import Response, Route, RouteContext
 
 

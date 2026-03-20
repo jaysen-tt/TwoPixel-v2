@@ -299,7 +299,6 @@ async def _validate_neo_connectivity(
     return None
 
 
-import copy
 
 
 def _mask_provider_sources(config_dict: dict) -> dict:

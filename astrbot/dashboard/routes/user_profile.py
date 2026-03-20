@@ -2,9 +2,8 @@ import datetime
 import json
 import os
 from pathlib import Path
-import httpx
-import asyncio
 
+import httpx
 from quart import g, request
 
 from astrbot.core import DEMO_MODE

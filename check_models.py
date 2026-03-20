@@ -1,7 +1,6 @@
 import json
-import urllib.request
 
-with open("data/cmd_config.json", "r", encoding="utf-8-sig") as f:
+with open("data/cmd_config.json", encoding="utf-8-sig") as f:
     config = json.load(f)
 
 for src in config.get("provider_sources", []):

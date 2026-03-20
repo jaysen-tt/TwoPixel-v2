@@ -2,7 +2,7 @@ import json
 
 config_path = "data/cmd_config.json"
 
-with open(config_path, "r", encoding="utf-8-sig") as f:
+with open(config_path, encoding="utf-8-sig") as f:
     config = json.load(f)
 
 # Update Kimi (moonshot) to be disabled
