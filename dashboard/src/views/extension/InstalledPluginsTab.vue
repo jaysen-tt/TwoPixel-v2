@@ -161,7 +161,7 @@ const {
           <v-tab-item v-show="activeTab === 'installed'">
             <div class="mb-4 pt-4 pb-4">
               <div class="d-flex align-center flex-wrap" style="gap: 12px">
-                <h2 class="text-h2 mb-0">{{ tm("titles.installedAstrBotPlugins") }}</h2>
+                <h2 class="text-h2 mb-0">{{ tm("titles.installedTwoPixelPlugins") }}</h2>
 
                 <div class="d-flex align-center flex-wrap ml-auto" style="gap: 8px">
                   <v-text-field
@@ -448,7 +448,7 @@ const {
                           class="d-flex align-center flex-wrap mt-1"
                         >
                           <span class="text-caption text-medium-emphasis mr-2">
-                            {{ tm("card.status.astrbotVersion") }}:
+                            {{ tm("card.status.twopixelVersion") }}:
                           </span>
                           <v-chip
                             size="x-small"

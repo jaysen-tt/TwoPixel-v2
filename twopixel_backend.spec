@@ -1,4 +1,36 @@
 # -*- mode: python ; coding: utf-8 -*-
+import sys
+import os
+from PyInstaller.utils.hooks import collect_submodules, collect_data_files
+
+# 1. Fix missing data dir error
+if not os.path.exists('data'):
+    os.makedirs('data', exist_ok=True)
+
+# 2. Bundle full Python env + toolchains
+hidden_imports = [
+    'ast', 'asyncio', 'logging', 'json', 'yaml', 'aiohttp', 
+    'astrbot', 'astrbot.core', 'astrbot.dashboard'
+]
+
+if hasattr(sys, 'stdlib_module_names'):
+    # Add standard library modules (excluding internal ones starting with '_')
+    stdlib_modules = [m for m in sys.stdlib_module_names if not m.startswith('_')]
+    hidden_imports.extend(stdlib_modules)
+
+for pkg in ['pip', 'setuptools', 'wheel']:
+    try:
+        hidden_imports.extend(collect_submodules(pkg))
+    except Exception:
+        pass
+
+datas = [('data', 'data')]
+
+for pkg in ['pip', 'setuptools', 'wheel']:
+    try:
+        datas.extend(collect_data_files(pkg))
+    except Exception:
+        pass
 
 block_cipher = None
 
@@ -6,11 +38,8 @@ a = Analysis(
     ['main.py'],
     pathex=['.'],
     binaries=[],
-    datas=[('data', 'data')],
-    hiddenimports=[
-        'ast', 'asyncio', 'logging', 'json', 'yaml', 'aiohttp', 
-        'astrbot', 'astrbot.core', 'astrbot.dashboard'
-    ],
+    datas=datas,
+    hiddenimports=hidden_imports,
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],

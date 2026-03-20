@@ -14,11 +14,26 @@ pub fn run() {
             .build(),
         )?;
       }
-      
-      // Spawn Python backend sidecar
-      let sidecar_command = app.shell().sidecar("twopixel-backend").unwrap();
-      let (mut rx, mut _child) = sidecar_command.spawn().expect("Failed to spawn sidecar");
-      
+
+      let astrbot_root = app
+        .path()
+        .app_data_dir()
+        .ok()
+        .unwrap_or(std::env::temp_dir())
+        .join(".astrbot");
+      let astrbot_root_string = astrbot_root.to_string_lossy().to_string();
+
+      let sidecar_command = app
+        .shell()
+        .sidecar("twopixel-backend")
+        .map_err(|e| format!("create backend sidecar failed: {e}"))?
+        .env("ASTRBOT_DESKTOP_CLIENT", "1")
+        .env("ASTRBOT_ROOT", &astrbot_root_string);
+
+      let (mut rx, mut _child) = sidecar_command
+        .spawn()
+        .map_err(|e| format!("spawn backend sidecar failed: {e}"))?;
+
       tauri::async_runtime::spawn(async move {
         while let Some(event) = rx.recv().await {
           if let CommandEvent::Stdout(line) = event {

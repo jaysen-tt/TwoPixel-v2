@@ -266,12 +266,12 @@ DEFAULT_CONFIG = {
     "wake_prefix": ["/"],
     "log_level": "INFO",
     "log_file_enable": False,
-    "log_file_path": "logs/astrbot.log",
+    "log_file_path": "logs/twopixel.log",
     "log_file_max_mb": 20,
     "temp_dir_max_size": 1024,
     "trace_enable": False,
     "trace_log_enable": False,
-    "trace_log_path": "logs/astrbot.trace.log",
+    "trace_log_path": "logs/twopixel.trace.log",
     "trace_log_max_mb": 20,
     "pip_install_arg": "",
     "pypi_index_url": "https://mirrors.aliyun.com/pypi/simple/",
@@ -3949,7 +3949,7 @@ CONFIG_METADATA_3_SYSTEM = {
                     "log_file_path": {
                         "description": "日志文件路径",
                         "type": "string",
-                        "hint": "相对路径以 data 目录为基准，例如 logs/astrbot.log；支持绝对路径。",
+                        "hint": "相对路径以 data 目录为基准，例如 logs/twopixel.log；支持绝对路径。",
                     },
                     "log_file_max_mb": {
                         "description": "日志文件大小上限 (MB)",
@@ -3969,7 +3969,7 @@ CONFIG_METADATA_3_SYSTEM = {
                     "trace_log_path": {
                         "description": "Trace 日志文件路径",
                         "type": "string",
-                        "hint": "相对路径以 data 目录为基准，例如 logs/astrbot.trace.log；支持绝对路径。",
+                        "hint": "相对路径以 data 目录为基准，例如 logs/twopixel.trace.log；支持绝对路径。",
                     },
                     "trace_log_max_mb": {
                         "description": "Trace 日志大小上限 (MB)",

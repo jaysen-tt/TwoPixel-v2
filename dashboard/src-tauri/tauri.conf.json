@@ -1,6 +1,6 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "TwoPixel",
+  "productName": "TwoPixel V2",
   "version": "0.1.0",
   "identifier": "com.twopixel.desktop",
   "build": {

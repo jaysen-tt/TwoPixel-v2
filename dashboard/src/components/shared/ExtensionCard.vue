@@ -321,7 +321,7 @@ const viewChangelog = () => {
                   label
                   size="small"
                 >
-                  AstrBot: {{ astrbotVersionRequirement }}
+                  TwoPixel: {{ astrbotVersionRequirement }}
                 </v-chip>
               </div>
 

@@ -35,6 +35,9 @@ jobs:
         with:
           node-version: 20
 
+      - name: Install pnpm
+        run: npm install -g pnpm
+
       - name: Install Rust stable
         uses: dtolnay/rust-toolchain@stable
         with:
@@ -58,7 +61,7 @@ jobs:
       - name: Build Python Backend
         run: |
           uv venv
-          uv pip install pyinstaller
+          uv pip install pyinstaller pip setuptools wheel
           mkdir -p data
           test -f data/.gitkeep || touch data/.gitkeep
           python - <<'PY'
@@ -91,11 +94,11 @@ jobs:
 
       - name: Install Frontend Dependencies
         working-directory: ./dashboard
-        run: npm install
+        run: pnpm install
 
       - name: Build Tauri App
         working-directory: ./dashboard
-        run: npx tauri build ${{ matrix.args }}
+        run: pnpm tauri build ${{ matrix.args }}
 
       - name: Upload Desktop Installer
         uses: actions/upload-artifact@v4

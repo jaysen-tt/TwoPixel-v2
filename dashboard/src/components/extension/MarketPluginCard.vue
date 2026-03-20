@@ -177,7 +177,7 @@ const handleInstall = (plugin) => {
             variant="outlined"
             style="height: 20px"
           >
-            AstrBot: {{ plugin.astrbot_version }}
+            TwoPixel: {{ plugin.astrbot_version }}
           </v-chip>
           <PluginPlatformChip
             :platforms="plugin.support_platforms"

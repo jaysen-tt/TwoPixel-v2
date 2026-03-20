@@ -622,7 +622,7 @@ const {
                   variant="outlined"
                   class="mr-2 mb-2"
                 >
-                  {{ tm("card.status.astrbotVersion") }}:
+                  {{ tm("card.status.twopixelVersion") }}:
                   {{ selectedInstallPlugin.astrbot_version }}
                 </v-chip>
                 <v-chip

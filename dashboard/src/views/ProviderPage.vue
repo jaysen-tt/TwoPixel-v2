@@ -208,7 +208,7 @@
     <v-dialog v-model="showProviderEditDialog" width="800">
       <v-card :title="providerEditData?.id || tm('dialogs.config.editTitle')">
         <v-card-text class="py-4">
-          <small style="color: gray;">不建议修改 ID，可能会导致指向该模型的相关配置（如默认模型、插件相关配置等）失效。旧版本 AstrBot 的 “提供商 ID” 是下方的 “ID”。</small>
+          <small style="color: gray;">不建议修改 ID，可能会导致指向该模型的相关配置（如默认模型、插件相关配置等）失效。旧版本 TwoPixel 的 “提供商 ID” 是下方的 “ID”。</small>
           <AstrBotConfig v-if="providerEditData" :iterable="providerEditData" :metadata="configSchema"
             metadataKey="provider" :is-editing="true" />
         </v-card-text>

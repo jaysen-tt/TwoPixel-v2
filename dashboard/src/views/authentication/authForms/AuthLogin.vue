@@ -23,7 +23,8 @@ async function validate(values: any, { setErrors }: any) {
   loading.value = true;
   authMessage.value = '';
 
-  const normalizedUsername = String(username.value || '').trim();
+  const formUsername = values?.username || username?.value;
+  const normalizedUsername = String(formUsername || '').trim();
   const isEmailLogin = normalizedUsername.includes('@');
   if (mode.value === 'login' && !isEmailLogin) {
     setErrors({ apiError: t('loginEmailRequired') });
@@ -57,7 +58,7 @@ async function validate(values: any, { setErrors }: any) {
 }
 
 async function onForgotPassword() {
-  const normalizedUsername = String(username.value || '').trim();
+  const normalizedUsername = String(username?.value || '').trim();
   const isEmail = normalizedUsername.includes('@');
   if (!isEmail) {
     authMessageType.value = 'error';
