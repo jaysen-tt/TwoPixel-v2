@@ -55,6 +55,8 @@ jobs:
         run: |
           uv venv
           uv pip install pyinstaller
+          mkdir -p data
+          test -f data/.gitkeep || touch data/.gitkeep
           python - <<'PY'
           from pathlib import Path
           src = Path("requirements.txt").read_text(encoding="utf-8").splitlines()
