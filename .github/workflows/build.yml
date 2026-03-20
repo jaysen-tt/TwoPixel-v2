@@ -13,13 +13,17 @@ jobs:
       matrix:
         include:
           - platform: 'macos-latest'
-            args: '--target aarch64-apple-darwin'
+            args: '--target aarch64-apple-darwin --bundles dmg'
             target: 'aarch64-apple-darwin'
             backend_name: 'twopixel-backend-aarch64-apple-darwin'
+            artifact_glob: 'dashboard/src-tauri/target/release/bundle/dmg/*.dmg'
+            artifact_name: 'twopixel-macos-dmg'
           - platform: 'windows-latest'
-            args: ''
+            args: '--bundles nsis'
             target: 'x86_64-pc-windows-msvc'
             backend_name: 'twopixel-backend-x86_64-pc-windows-msvc.exe'
+            artifact_glob: 'dashboard/src-tauri/target/release/bundle/nsis/*.exe'
+            artifact_name: 'twopixel-windows-nsis'
 
     runs-on: ${{ matrix.platform }}
 
@@ -90,14 +94,11 @@ jobs:
         run: npm install
 
       - name: Build Tauri App
-        uses: tauri-apps/tauri-action@v0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        working-directory: ./dashboard
+        run: npx tauri build ${{ matrix.args }}
+
+      - name: Upload Desktop Installer
+        uses: actions/upload-artifact@v4
         with:
-          projectPath: './dashboard'
-          args: ${{ matrix.args }}
-          tagName: app-v__VERSION__
-          releaseName: 'TwoPixel Desktop v__VERSION__'
-          releaseBody: 'See the assets to download this version and install.'
-          releaseDraft: true
-          prerelease: false
+          name: ${{ matrix.artifact_name }}
+          path: ${{ matrix.artifact_glob }}
