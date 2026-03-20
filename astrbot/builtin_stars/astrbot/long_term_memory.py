@@ -154,7 +154,9 @@ class LongTermMemory:
         except Exception as e:
             logger.error(f"写入每日记忆失败: {e}")
 
-    def _append_compaction_record(self, umo: str, summary: str, source_cnt: int) -> None:
+    def _append_compaction_record(
+        self, umo: str, summary: str, source_cnt: int
+    ) -> None:
         file_path = self._compactions_file(umo)
         payload = {
             "time": datetime.datetime.now().isoformat(),
@@ -192,7 +194,9 @@ class LongTermMemory:
             logger.error(f"读取蒸馏记忆失败: {e}")
             return []
 
-    def _save_distilled_records(self, umo: str, rows: list[dict], max_records: int) -> None:
+    def _save_distilled_records(
+        self, umo: str, rows: list[dict], max_records: int
+    ) -> None:
         file_path = self._distilled_file(umo)
         safe_rows = rows[-max_records:]
         try:
@@ -232,11 +236,15 @@ class LongTermMemory:
     def _infer_room_assignments(self, text: str) -> list[str]:
         lowered = text.lower()
         rooms: list[str] = []
-        if any(k in lowered for k in ["代码", "bug", "fix", "debug", "refactor", "compile"]):
+        if any(
+            k in lowered for k in ["代码", "bug", "fix", "debug", "refactor", "compile"]
+        ):
             rooms.append("engineering")
         if any(k in lowered for k in ["配置", "config", "env", "setting"]):
             rooms.append("configuration")
-        if any(k in lowered for k in ["计划", "方案", "roadmap", "milestone", "分阶段"]):
+        if any(
+            k in lowered for k in ["计划", "方案", "roadmap", "milestone", "分阶段"]
+        ):
             rooms.append("planning")
         if any(k in lowered for k in ["偏好", "喜欢", "不喜欢", "prefer", "habit"]):
             rooms.append("preference")
@@ -414,9 +422,7 @@ class LongTermMemory:
             return
         summary = self._build_compaction_summary(compact_target)
         stamp = datetime.datetime.now().strftime("%H:%M:%S")
-        summary_line = (
-            f"[MemorySummary/{stamp}] 历史对话压缩总结（{len(compact_target)}条）：{summary}"
-        )
+        summary_line = f"[MemorySummary/{stamp}] 历史对话压缩总结（{len(compact_target)}条）：{summary}"
         self._append_daily_line(umo, summary_line)
         self._append_compaction_record(umo, summary, len(compact_target))
         merged = [summary_line] + rows[-keep_recent:]

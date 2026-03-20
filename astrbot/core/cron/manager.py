@@ -415,9 +415,7 @@ class CronJobManager:
                 "Only provide user-facing content when there is actionable attention."
             )
             if heartbeat_target == "none":
-                req.system_prompt += (
-                    " Do not send messages to user in this run."
-                )
+                req.system_prompt += " Do not send messages to user in this run."
         else:
             req.prompt = (
                 "You are now responding to a scheduled task. "
@@ -447,12 +445,16 @@ class CronJobManager:
         if is_heartbeat and llm_resp and llm_resp.role == "assistant":
             ack_max_chars = int(heartbeat_cfg.get("ack_max_chars", 240))
             if self._is_heartbeat_ok_response(llm_resp.completion_text, ack_max_chars):
-                cron_job_id = str(extras.get("cron_job", {}).get("id", "") if extras else "")
+                cron_job_id = str(
+                    extras.get("cron_job", {}).get("id", "") if extras else ""
+                )
                 if cron_job_id:
                     latest_job = await self.db.get_cron_job(cron_job_id)
                     if latest_job:
                         await self._update_heartbeat_runtime_status(
-                            latest_job, status="ack_ok", note="suppressed by HEARTBEAT_OK"
+                            latest_job,
+                            status="ack_ok",
+                            note="suppressed by HEARTBEAT_OK",
                         )
                 return
         cron_meta = extras.get("cron_job", {}) if extras else {}
@@ -474,21 +476,29 @@ class CronJobManager:
         if not llm_resp:
             logger.warning("Cron job agent got no response")
             if is_heartbeat:
-                cron_job_id = str(extras.get("cron_job", {}).get("id", "") if extras else "")
+                cron_job_id = str(
+                    extras.get("cron_job", {}).get("id", "") if extras else ""
+                )
                 if cron_job_id:
                     latest_job = await self.db.get_cron_job(cron_job_id)
                     if latest_job:
                         await self._update_heartbeat_runtime_status(
-                            latest_job, status="no_response", note="no assistant response"
+                            latest_job,
+                            status="no_response",
+                            note="no assistant response",
                         )
             return
         if is_heartbeat:
-            cron_job_id = str(extras.get("cron_job", {}).get("id", "") if extras else "")
+            cron_job_id = str(
+                extras.get("cron_job", {}).get("id", "") if extras else ""
+            )
             if cron_job_id:
                 latest_job = await self.db.get_cron_job(cron_job_id)
                 if latest_job:
                     await self._update_heartbeat_runtime_status(
-                        latest_job, status="delivered", note="heartbeat message delivered"
+                        latest_job,
+                        status="delivered",
+                        note="heartbeat message delivered",
                     )
 
     def _is_heartbeat_ok_response(self, text: str, ack_max_chars: int) -> bool:

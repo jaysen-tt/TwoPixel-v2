@@ -19,7 +19,9 @@ class UserProfileRoute(Route):
         self.routes = {
             "/user/profile": [("GET", self.get_profile), ("POST", self.update_profile)],
         }
-        self.profiles_file = Path(get_astrbot_data_path()) / "dashboard_user_profiles.json"
+        self.profiles_file = (
+            Path(get_astrbot_data_path()) / "dashboard_user_profiles.json"
+        )
         self.profiles_file.parent.mkdir(parents=True, exist_ok=True)
         self.register_routes()
 
@@ -82,9 +84,13 @@ class UserProfileRoute(Route):
         profile = profiles.get(username) if isinstance(profiles, dict) else None
         if not isinstance(profile, dict):
             profile = {}
-            
-        sb_token = request.headers.get("X-Supabase-Access-Token") or request.headers.get("x-supabase-access-token")
-        sb_user_id = request.headers.get("X-Supabase-User-Id") or request.headers.get("x-supabase-user-id")
+
+        sb_token = request.headers.get(
+            "X-Supabase-Access-Token"
+        ) or request.headers.get("x-supabase-access-token")
+        sb_user_id = request.headers.get("X-Supabase-User-Id") or request.headers.get(
+            "x-supabase-user-id"
+        )
         supabase_user = None
         supabase_url, supabase_anon_key = self._supabase_base()
         debug_enabled = request.args.get("debug") == "1"
@@ -96,7 +102,7 @@ class UserProfileRoute(Route):
             "metadata_avatar": "",
             "profiles_row_found": False,
         }
-        
+
         if sb_token:
             try:
                 supabase_user = await self._fetch_supabase_user(sb_token)
@@ -105,7 +111,9 @@ class UserProfileRoute(Route):
                 if supabase_user:
                     metadata = supabase_user.get("user_metadata") or {}
                     if isinstance(metadata, dict):
-                        name = str(metadata.get("full_name") or metadata.get("name") or "").strip()
+                        name = str(
+                            metadata.get("full_name") or metadata.get("name") or ""
+                        ).strip()
                         avatar = str(metadata.get("avatar_url") or "").strip()
                         if debug_enabled:
                             debug_info["metadata_name"] = name
@@ -169,10 +177,14 @@ class UserProfileRoute(Route):
             return Response().error("昵称不能超过 64 个字符").__dict__
         if len(avatar_url) > 2_000_000:
             return Response().error("头像数据过大").__dict__
-            
-        sb_token = request.headers.get("X-Supabase-Access-Token") or request.headers.get("x-supabase-access-token")
-        sb_user_id = request.headers.get("X-Supabase-User-Id") or request.headers.get("x-supabase-user-id")
-        
+
+        sb_token = request.headers.get(
+            "X-Supabase-Access-Token"
+        ) or request.headers.get("x-supabase-access-token")
+        sb_user_id = request.headers.get("X-Supabase-User-Id") or request.headers.get(
+            "x-supabase-user-id"
+        )
+
         if sb_token:
             try:
                 if not sb_user_id:
@@ -188,11 +200,15 @@ class UserProfileRoute(Route):
                         "Prefer": "return=representation",
                     }
                     if sb_user_id:
-                        payload = [{
-                            "username": nickname,
-                            "avatar_url": avatar_url or None,
-                            "updated_at": datetime.datetime.now(datetime.timezone.utc).isoformat()
-                        }]
+                        payload = [
+                            {
+                                "username": nickname,
+                                "avatar_url": avatar_url or None,
+                                "updated_at": datetime.datetime.now(
+                                    datetime.timezone.utc
+                                ).isoformat(),
+                            }
+                        ]
                         res = await client.patch(
                             f"{supabase_url}/rest/v1/profiles?id=eq.{sb_user_id}",
                             headers=sb_headers,
@@ -203,14 +219,16 @@ class UserProfileRoute(Route):
                             rows = res.json()
                             if not rows or len(rows) == 0:
                                 payload[0]["id"] = sb_user_id
-                                payload[0]["email"] = username if "@" in username else None
+                                payload[0]["email"] = (
+                                    username if "@" in username else None
+                                )
                                 await client.post(
                                     f"{supabase_url}/rest/v1/profiles",
                                     headers=sb_headers,
                                     json=payload,
                                     timeout=10.0,
                                 )
-                    
+
                     auth_meta_headers = {
                         "apikey": supabase_anon_key,
                         "Authorization": f"Bearer {sb_token}",
@@ -220,18 +238,18 @@ class UserProfileRoute(Route):
                         "data": {
                             "full_name": nickname,
                             "name": nickname,
-                            "avatar_url": avatar_url or None
+                            "avatar_url": avatar_url or None,
                         }
                     }
                     await client.put(
                         f"{supabase_url}/auth/v1/user",
                         headers=auth_meta_headers,
                         json=meta_payload,
-                        timeout=10.0
+                        timeout=10.0,
                     )
             except Exception:
                 pass
-                
+
         profiles = self._load_profiles()
         profiles[username] = {
             "nickname": nickname,

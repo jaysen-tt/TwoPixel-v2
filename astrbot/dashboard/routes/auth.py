@@ -85,10 +85,14 @@ class AuthRoute(Route):
         ok = await self._supabase_send_reset_email(email)
         if not ok:
             return Response().error("重置邮件发送失败，请稍后重试").__dict__
-        return Response().ok(
-            {"email": email},
-            "已发送重置邮件，请检查收件箱",
-        ).__dict__
+        return (
+            Response()
+            .ok(
+                {"email": email},
+                "已发送重置邮件，请检查收件箱",
+            )
+            .__dict__
+        )
 
     def _supabase_base(self) -> tuple[str, str]:
         supabase_url = str(

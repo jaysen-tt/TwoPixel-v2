@@ -301,11 +301,12 @@ async def _validate_neo_connectivity(
 
 import copy
 
+
 def _mask_provider_sources(config_dict: dict) -> dict:
     """Mask API keys in provider sources before sending to frontend to prevent leakage."""
     if not isinstance(config_dict, dict):
         return config_dict
-    
+
     masked_config = copy.deepcopy(config_dict)
     if "provider_sources" in masked_config:
         for ps in masked_config["provider_sources"]:
@@ -313,15 +314,19 @@ def _mask_provider_sources(config_dict: dict) -> dict:
                 ps["key"] = ["sk-****"]
     return masked_config
 
+
 def _restore_provider_sources(post_config: dict, old_config: dict) -> None:
     """Restore API keys from old config if they were masked."""
     if "provider_sources" in post_config and "provider_sources" in old_config:
         # Create a mapping of id -> key array from the old config
-        old_sources = {ps["id"]: ps for ps in old_config.get("provider_sources", []) if "id" in ps}
+        old_sources = {
+            ps["id"]: ps for ps in old_config.get("provider_sources", []) if "id" in ps
+        }
         for ps in post_config["provider_sources"]:
             if "id" in ps and ps.get("key") == ["sk-****"]:
                 if ps["id"] in old_sources:
                     ps["key"] = old_sources[ps["id"]].get("key", [])
+
 
 def save_config(
     post_config: dict, config: AstrBotConfig, is_core: bool = False
@@ -470,7 +475,11 @@ class ConfigRoute(Route):
 
         # Restore masked API key if it was masked
         if new_source_config.get("key") == ["sk-****"]:
-            old_sources = {ps["id"]: ps for ps in self.config.get("provider_sources", []) if "id" in ps}
+            old_sources = {
+                ps["id"]: ps
+                for ps in self.config.get("provider_sources", [])
+                if "id" in ps
+            }
             if original_id in old_sources:
                 new_source_config["key"] = old_sources[original_id].get("key", [])
 
@@ -553,7 +562,7 @@ class ConfigRoute(Route):
         config_schema = {
             "provider": provider_metadata["provider_group"]["metadata"]["provider"]
         }
-        
+
         masked_config = _mask_provider_sources(dict(astrbot_config))
         data = {
             "config_schema": config_schema,
@@ -663,13 +672,19 @@ class ConfigRoute(Route):
                 metadata = ConfigMetadataI18n.convert_to_i18n_keys(
                     CONFIG_METADATA_3_SYSTEM
                 )
-                return Response().ok({"config": masked_abconf, "metadata": metadata}).__dict__
+                return (
+                    Response()
+                    .ok({"config": masked_abconf, "metadata": metadata})
+                    .__dict__
+                )
             if abconf_id is None:
                 raise ValueError("abconf_id cannot be None")
             abconf = self.acm.confs[abconf_id]
             masked_abconf = _mask_provider_sources(abconf)
             metadata = ConfigMetadataI18n.convert_to_i18n_keys(CONFIG_METADATA_3)
-            return Response().ok({"config": masked_abconf, "metadata": metadata}).__dict__
+            return (
+                Response().ok({"config": masked_abconf, "metadata": metadata}).__dict__
+            )
         except ValueError as e:
             return Response().error(str(e)).__dict__
 

@@ -7,6 +7,7 @@ import sys
 # Load environment variables from .env file before anything else
 try:
     from dotenv import load_dotenv
+
     load_dotenv()
 except ImportError:
     pass

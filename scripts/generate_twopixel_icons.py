@@ -69,10 +69,20 @@ def main() -> None:
     build_icon(logo, 256).save(
         ICONS_DIR / "icon.ico",
         format="ICO",
-        sizes=[(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)],
+        sizes=[
+            (16, 16),
+            (24, 24),
+            (32, 32),
+            (48, 48),
+            (64, 64),
+            (128, 128),
+            (256, 256),
+        ],
     )
     build_icon(logo, 1024).save(ICONS_DIR / "icon.icns", format="ICNS")
-    build_icon(logo, 220).save(ASSETS_DIR / "astrbot_logo_mini.webp", format="WEBP", quality=95)
+    build_icon(logo, 220).save(
+        ASSETS_DIR / "astrbot_logo_mini.webp", format="WEBP", quality=95
+    )
     build_icon(logo, 120).save(ASSETS_DIR / "plugin_icon.png", format="PNG")
     build_icon(logo, 256).save(PUBLIC_DIR / "favicon.png", format="PNG")
 

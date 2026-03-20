@@ -138,7 +138,9 @@ class AstrBotConfig(dict):
                 "custom_headers": {},
             }
         )
-        gemini_image_key = env_key_for(gemini_image_source_id) or env_key_for(gemini_source_id)
+        gemini_image_key = env_key_for(gemini_image_source_id) or env_key_for(
+            gemini_source_id
+        )
         upsert_provider_source(
             {
                 "id": gemini_image_source_id,
@@ -241,7 +243,10 @@ class AstrBotConfig(dict):
         )
 
         for provider in providers:
-            if provider.get("id") == "twopixel-moonshot" and provider.get("enable") is not False:
+            if (
+                provider.get("id") == "twopixel-moonshot"
+                and provider.get("enable") is not False
+            ):
                 provider["enable"] = False
                 has_new = True
 
@@ -362,7 +367,9 @@ class AstrBotConfig(dict):
                 # If the key was loaded from ENV, we should clear it or leave it as "" in the file
                 # But to be safe, we just clear all keys in the file and enforce ENV usage
                 if "id" in ps_copy:
-                    env_key_name = f"ASTRBOT_KEY_{ps_copy['id'].upper().replace('-', '_')}"
+                    env_key_name = (
+                        f"ASTRBOT_KEY_{ps_copy['id'].upper().replace('-', '_')}"
+                    )
                     if os.environ.get(env_key_name) and "key" in ps_copy:
                         ps_copy["key"] = [""]
                 conf_to_save["provider_sources"].append(ps_copy)
