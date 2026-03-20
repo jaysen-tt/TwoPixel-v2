@@ -55,7 +55,22 @@ jobs:
         run: |
           uv venv
           uv pip install pyinstaller
-          uv pip install -r requirements.txt
+          python - <<'PY'
+          from pathlib import Path
+          src = Path("requirements.txt").read_text(encoding="utf-8").splitlines()
+          skip_prefixes = ("faiss-cpu",)
+          filtered = []
+          for line in src:
+            raw = line.strip()
+            if not raw or raw.startswith("#"):
+              filtered.append(line)
+              continue
+            if raw.startswith(skip_prefixes):
+              continue
+            filtered.append(line)
+          Path("requirements.ci.txt").write_text("\n".join(filtered) + "\n", encoding="utf-8")
+          PY
+          uv pip install -r requirements.ci.txt
           uv run pyinstaller twopixel_backend.spec
         shell: bash
 
