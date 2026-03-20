@@ -13,6 +13,29 @@ import { loader } from '@guolao/vue-monaco-editor'
 import axios from 'axios';
 import { waitForRouterReadyInBackground } from './utils/routerReadiness.mjs';
 
+const DESKTOP_API_BASE = 'http://127.0.0.1:6185';
+const IS_DESKTOP_RUNTIME =
+  typeof window !== 'undefined' &&
+  (window.location.protocol === 'tauri:' || !!window.astrbotDesktop?.isDesktop);
+
+if (IS_DESKTOP_RUNTIME) {
+  axios.defaults.baseURL = DESKTOP_API_BASE;
+}
+
+function normalizeDesktopUrl(input: RequestInfo | URL): RequestInfo | URL {
+  if (!IS_DESKTOP_RUNTIME) return input;
+  if (typeof input === 'string') {
+    if (input.startsWith('/')) return `${DESKTOP_API_BASE}${input}`;
+    return input;
+  }
+  if (input instanceof URL) {
+    if (input.origin === window.location.origin && input.pathname.startsWith('/')) {
+      return new URL(`${DESKTOP_API_BASE}${input.pathname}${input.search}${input.hash}`);
+    }
+  }
+  return input;
+}
+
 // 初始化新的i18n系统，等待完成后再挂载应用
 setupI18n().then(async () => {
   console.log('🌍 新i18n系统初始化完成');
@@ -98,10 +121,11 @@ axios.interceptors.request.use((config) => {
 // Some parts of the UI use fetch directly; without this, those requests will 401.
 const _origFetch = window.fetch.bind(window);
 window.fetch = (input: RequestInfo | URL, init?: RequestInit) => {
+  const normalizedInput = normalizeDesktopUrl(input);
   const token = localStorage.getItem('token');
-  if (!token) return _origFetch(input, init);
+  if (!token) return _origFetch(normalizedInput, init);
 
-  const headers = new Headers(init?.headers || (typeof input !== 'string' && 'headers' in input ? (input as Request).headers : undefined));
+  const headers = new Headers(init?.headers || (typeof normalizedInput !== 'string' && 'headers' in normalizedInput ? (normalizedInput as Request).headers : undefined));
   if (!headers.has('Authorization')) {
     headers.set('Authorization', `Bearer ${token}`);
   }
@@ -109,7 +133,7 @@ window.fetch = (input: RequestInfo | URL, init?: RequestInit) => {
   if (locale && !headers.has('Accept-Language')) {
     headers.set('Accept-Language', locale);
   }
-  return _origFetch(input, { ...init, headers });
+  return _origFetch(normalizedInput, { ...init, headers });
 };
 
 loader.config({
