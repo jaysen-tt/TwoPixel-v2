@@ -22,13 +22,21 @@ pub fn run() {
         .unwrap_or(std::env::temp_dir())
         .join(".astrbot");
       let astrbot_root_string = astrbot_root.to_string_lossy().to_string();
+      let webui_dir = app.path().resource_dir().ok();
 
-      let sidecar_command = app
+      let mut sidecar_command = app
         .shell()
         .sidecar("twopixel-backend")
         .map_err(|e| format!("create backend sidecar failed: {e}"))?
         .env("ASTRBOT_DESKTOP_CLIENT", "1")
         .env("ASTRBOT_ROOT", &astrbot_root_string);
+      if let Some(dir) = webui_dir {
+        let dir_string = dir.to_string_lossy().to_string();
+        sidecar_command = sidecar_command
+          .env("ASTRBOT_WEBUI_DIR", &dir_string)
+          .arg("--webui-dir")
+          .arg(dir_string);
+      }
 
       let (mut rx, mut _child) = sidecar_command
         .spawn()

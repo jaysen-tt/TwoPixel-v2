@@ -10,17 +10,45 @@ type AuthEnvelope = {
   data?: Record<string, unknown> | null;
 };
 
-function extractAuthData(raw: unknown): Record<string, unknown> {
-  if (!raw || typeof raw !== 'object') return {};
-  const envelope = raw as AuthEnvelope;
-  if (envelope.data && typeof envelope.data === 'object') {
-    return envelope.data as Record<string, unknown>;
-  }
-  const level2 = (raw as any)?.data;
-  if (level2 && typeof level2 === 'object' && level2.data && typeof level2.data === 'object') {
-    return level2.data as Record<string, unknown>;
-  }
-  return {};
+function asRecord(value: unknown): Record<string, unknown> | null {
+  if (!value || typeof value !== 'object') return null;
+  return value as Record<string, unknown>;
+}
+
+function hasAuthPayloadShape(value: Record<string, unknown> | null): boolean {
+  if (!value) return false;
+  return [
+    'token',
+    'username',
+    'supabase_access_token',
+    'supabase_refresh_token',
+    'supabase_user',
+    'change_pwd_hint'
+  ].some((key) => key in value);
+}
+
+function normalizeAuthPayload(raw: unknown): { status: string; message: string; data: Record<string, unknown> } {
+  const level0 = asRecord(raw) || {};
+  const level1 = asRecord(level0.data);
+  const level2 = asRecord(level1?.data);
+
+  const status = String(level0.status || level1?.status || '');
+  const message = String(level0.message || level1?.message || '');
+
+  const candidates = [
+    level0.data as Record<string, unknown> | null,
+    level1?.data as Record<string, unknown> | null,
+    level2,
+    level1,
+    level0
+  ];
+  const picked = candidates.find((item) => hasAuthPayloadShape(asRecord(item)));
+
+  return {
+    status,
+    message,
+    data: asRecord(picked) || {}
+  };
 }
 
 export const useAuthStore = defineStore({
@@ -38,15 +66,15 @@ export const useAuthStore = defineStore({
           password: password
         });
 
-        const payload = (res?.data ?? {}) as AuthEnvelope;
-        if (payload?.status === 'error') {
-          return Promise.reject(payload?.message || '登录失败，请稍后重试');
+        const payload = normalizeAuthPayload(res?.data);
+        if (payload.status === 'error') {
+          return Promise.reject(payload.message || '登录失败，请稍后重试');
         }
 
-        const data = extractAuthData(payload);
+        const data = payload.data;
         const token = String(data?.token || '').trim();
         if (!token) {
-          return Promise.reject(payload?.message || '登录失败：服务端未返回有效令牌');
+          return Promise.reject(payload.message || '登录失败：服务端未返回有效令牌');
         }
 
         this.username = String(data?.username || username).trim();
@@ -67,11 +95,11 @@ export const useAuthStore = defineStore({
     async signup(email: string, password: string): Promise<void> {
       try {
         const res = await axios.post('/api/auth/signup', { email, password });
-        const payload = (res?.data ?? {}) as AuthEnvelope;
-        if (payload?.status === 'error') {
-          return Promise.reject(payload?.message || '注册失败，请稍后重试');
+        const payload = normalizeAuthPayload(res?.data);
+        if (payload.status === 'error') {
+          return Promise.reject(payload.message || '注册失败，请稍后重试');
         }
-        const data = extractAuthData(payload);
+        const data = payload.data;
         const dashboardToken = String(data.token || '').trim();
         if (!dashboardToken) {
           return Promise.reject('注册成功，请先去邮箱完成验证，再返回登录。');
