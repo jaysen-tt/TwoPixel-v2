@@ -274,7 +274,7 @@ async def download_dashboard(
             )
     else:
         url = f"https://github.com/AstrBotDevs/astrbot-release-harbour/releases/download/release-{version}/dist.zip"
-        logger.info(f"准备下载指定版本的 AstrBot WebUI: {url}")
+        logger.info(f"准备下载指定版本的 TwoPixel WebUI: {url}")
         if proxy:
             url = f"{proxy}/{url}"
         await download_file(url, str(zip_path), show_progress=True)

@@ -3,6 +3,14 @@ import asyncio
 import mimetypes
 import os
 import sys
+
+# Load environment variables from .env file before anything else
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 from pathlib import Path
 
 import runtime_bootstrap
@@ -30,12 +38,12 @@ from astrbot.core.utils.io import (  # noqa: E402
 sys.path.append(Path(__file__).parent.as_posix())
 
 logo_tmpl = r"""
-     ___           _______.___________..______      .______     ______   .___________.
-    /   \         /       |           ||   _  \     |   _  \   /  __  \  |           |
-   /  ^  \       |   (----`---|  |----`|  |_)  |    |  |_)  | |  |  |  | `---|  |----`
-  /  /_\  \       \   \       |  |     |      /     |   _  <  |  |  |  |     |  |
- /  _____  \  .----)   |      |  |     |  |\  \----.|  |_)  | |  `--'  |     |  |
-/__/     \__\ |_______/       |__|     | _| `._____||______/   \______/      |__|
+████████╗██╗    ██╗ ██████╗ ██████╗ ██╗██╗  ██╗███████╗██╗
+╚══██╔══╝██║    ██║██╔═══██╗██╔══██╗██║╚██╗██╔╝██╔════╝██║
+   ██║   ██║ █╗ ██║██║   ██║██████╔╝██║ ╚███╔╝ █████╗  ██║
+   ██║   ██║███╗██║██║   ██║██╔═══╝ ██║ ██╔██╗ ██╔══╝  ██║
+   ██║   ╚███╔███╔╝╚██████╔╝██║     ██║██╔╝ ██╗███████╗███████╗
+   ╚═╝    ╚══╝╚══╝  ╚═════╝ ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝
 
 """
 
@@ -83,12 +91,12 @@ async def check_dashboard_files(webui_dir: str | None = None):
                 logger.info("WebUI 版本已是最新。")
             else:
                 logger.warning(
-                    f"检测到 WebUI 版本 ({v}) 与当前 AstrBot 版本 (v{VERSION}) 不符。",
+                    f"检测到 WebUI 版本 ({v}) 与当前 TwoPixel 版本 (v{VERSION}) 不符。",
                 )
         return data_dist_path
 
     logger.info(
-        "开始下载管理面板文件...高峰期（晚上）可能导致较慢的速度。如多次下载失败，请前往 https://github.com/AstrBotDevs/AstrBot/releases/latest 下载 dist.zip，并将其中的 dist 文件夹解压至 data 目录下。",
+        "开始下载管理面板文件...高峰期（晚上）可能导致较慢的速度。如多次下载失败，请前往 https://github.com/TwoPixelDevs/TwoPixel/releases/latest 下载 dist.zip，并将其中的 dist 文件夹解压至 data 目录下。",
     )
 
     try:
@@ -122,7 +130,7 @@ async def main_async(webui_dir_arg: str | None) -> None:
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="AstrBot")
+    parser = argparse.ArgumentParser(description="TwoPixel")
     parser.add_argument(
         "--webui-dir",
         type=str,

@@ -9,6 +9,8 @@ uv.lock
 # IDE and editors
 .vscode
 .idea
+.env
+dashboard/.env
 
 # Logs and temporary files
 botpy.log
@@ -32,6 +34,7 @@ tests/astrbot_plugin_openai
 # Dashboard
 dashboard/node_modules/
 dashboard/dist/
+dashboard/src-tauri/bin/
 .pnpm-store/
 package-lock.json
 yarn.lock
@@ -49,6 +52,11 @@ astrbot.lock
 
 # Other
 chroma
+build/
+dist/
+*.dmg
+*.pkg
+*.exe
 venv/*
 pytest.ini
 AGENTS.md
@@ -62,4 +70,3 @@ GenieData/
 .opencode/
 .kilocode/
 .worktrees/
-

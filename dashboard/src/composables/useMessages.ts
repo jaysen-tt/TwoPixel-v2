@@ -157,8 +157,12 @@ export function useMessages(
         return `msg_${Date.now()}_${Math.random().toString(36).slice(2)}`;
     }
 
+    function getAuthToken(): string {
+        return String(localStorage.getItem('token') || '').trim();
+    }
+
     function buildWebSocketUrl(): string {
-        const token = localStorage.getItem('token');
+        const token = getAuthToken();
         if (!token) {
             throw new Error('Missing authentication token');
         }
@@ -770,7 +774,7 @@ export function useMessages(
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + localStorage.getItem('token')
+                'Authorization': 'Bearer ' + getAuthToken()
             },
             signal: controller.signal,
             body: JSON.stringify({

@@ -1,0 +1,103 @@
+
+████████╗██╗    ██╗ ██████╗ ██████╗ ██╗██╗  ██╗███████╗██╗
+╚══██╔══╝██║    ██║██╔═══██╗██╔══██╗██║╚██╗██╔╝██╔════╝██║
+   ██║   ██║ █╗ ██║██║   ██║██████╔╝██║ ╚███╔╝ █████╗  ██║
+   ██║   ██║███╗██║██║   ██║██╔═══╝ ██║ ██╔██╗ ██╔══╝  ██║
+   ██║   ╚███╔███╔╝╚██████╔╝██║     ██║██╔╝ ██╗███████╗███████╗
+   ╚═╝    ╚══╝╚══╝  ╚═════╝ ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝╚══════╝
+
+Welcome to TwoPixel CLI!
+TwoPixel CLI version: 4.20.1
+[32m[09:50:09.870][0m [Core] [34m[1m[DBUG][0m [agent.tool_image_cache:55]: [34m[1mToolImageCache initialized, cache dir: /Users/jaysen/Desktop/cb/twopixel-v2/data/temp/tool_images[0m
+[32m[09:50:09.934][0m [Core] [34m[1m[DBUG][0m [faiss.loader:96]: [34m[1mEnvironment variable FAISS_OPT_LEVEL is not set, so let's pick the instruction set according to the current CPU[0m
+[32m[09:50:09.934][0m [Core] [1m[INFO][0m [faiss.loader:156]: [1mLoading faiss.[0m
+[32m[09:50:09.945][0m [Core] [1m[INFO][0m [faiss.loader:158]: [1mSuccessfully loaded faiss.[0m
+[32m[09:50:10.109][0m [Core] [34m[1m[DBUG][0m [platform.register:60]: [34m[1m平台适配器 aiocqhttp 已注册[0m
+[32m[09:50:10.133][0m [Core] [34m[1m[DBUG][0m [platform.register:60]: [34m[1m平台适配器 wecom_ai_bot 已注册[0m
+[32m[09:50:10.134][0m [Core] [34m[1m[DBUG][0m [platform.register:60]: [34m[1m平台适配器 webchat 已注册[0m
+Dashboard is already up to date
+[32m[09:50:10.201][0m [Core] [34m[1m[DBUG][0m [core.core_lifecycle:80]: [34m[1mHTTP proxy cleared[0m
+[32m[09:50:10.201][0m [Core] [1m[INFO][0m [core.core_lifecycle:106]: [1mTwoPixel v4.20.1[0m
+[32m[09:50:10.232][0m [Core] [1m[INFO][0m [core.persona_mgr:38]: [1m已加载 0 个人格。[0m
+[32m[09:50:10.239][0m [Core] [1m[INFO][0m [core.subagent_orchestrator:102]: [1mRegistered subagent handoff tool: transfer_to_planner[0m
+[32m[09:50:10.239][0m [Core] [1m[INFO][0m [core.subagent_orchestrator:102]: [1mRegistered subagent handoff tool: transfer_to_executor[0m
+[32m[09:50:10.241][0m [Core] [1m[INFO][0m [star.star_manager:782]: [1m正在载入插件 session_controller ...[0m
+[32m[09:50:10.243][0m [Core] [1m[INFO][0m [star.star_manager:866]: [1mPlugin session_controller (v1.0.1) by Cvandia & Soulter: 为插件支持会话控制[0m
+[32m[09:50:10.243][0m [Core] [1m[INFO][0m [star.star_manager:782]: [1m正在载入插件 builtin_commands ...[0m
+[32m[09:50:10.250][0m [Core] [1m[INFO][0m [star.star_manager:866]: [1mPlugin builtin_commands (0.0.1) by Soulter: AstrBot 自带指令，提供常用的对话管理、工具使用、插件管理等功能。[0m
+[32m[09:50:10.250][0m [Core] [1m[INFO][0m [star.star_manager:782]: [1m正在载入插件 web_searcher ...[0m
+[32m[09:50:10.301][0m [Core] [1m[INFO][0m [provider.func_tool_manager:304]: [1m添加函数调用工具: web_search[0m
+[32m[09:50:10.303][0m [Core] [1m[INFO][0m [provider.func_tool_manager:304]: [1m添加函数调用工具: fetch_url[0m
+[32m[09:50:10.306][0m [Core] [1m[INFO][0m [provider.func_tool_manager:304]: [1m添加函数调用工具: web_search_tavily[0m
+[32m[09:50:10.308][0m [Core] [1m[INFO][0m [provider.func_tool_manager:304]: [1m添加函数调用工具: tavily_extract_web_page[0m
+[32m[09:50:10.311][0m [Core] [1m[INFO][0m [provider.func_tool_manager:304]: [1m添加函数调用工具: web_search_bocha[0m
+[32m[09:50:10.312][0m [Core] [1m[INFO][0m [star.star_manager:866]: [1mPlugin astrbot-web-searcher (1.14.514) by Soulter: 让 LLM 具有网页检索能力[0m
+[32m[09:50:10.312][0m [Core] [1m[INFO][0m [star.star_manager:782]: [1m正在载入插件 astrbot ...[0m
+[32m[09:50:10.313][0m [Core] [1m[INFO][0m [star.star_manager:866]: [1mPlugin astrbot (4.1.0) by Soulter: AstrBot 自带插件，包含人格注入、思考内容注入、群聊上下文感知等功能的实现，禁用后将无法使用这些功能。[0m
+[32m[09:50:10.315][0m [Core] [1m[INFO][0m [provider.manager:526]: [1m载入 googlegenai_chat_completion(twopixel-gemini) 服务提供商 ...[0m
+[32m[09:50:10.316][0m [Core] [31m[1m[ERRO][0m [v4.20.1] [provider.manager:663]: [31m[1m实例化 googlegenai_chat_completion(twopixel-gemini) 提供商适配器失败：No API key was provided. Please pass a valid API key. Learn how to create an API key at https://ai.google.dev/gemini-api/docs/api-key.[0m
+[32m[09:50:10.319][0m [Core] [31m[1m[ERRO][0m [v4.20.1] [provider.manager:279]: [31m[1mTraceback (most recent call last):
+  File "/Users/jaysen/Desktop/cb/twopixel-v2/astrbot/core/provider/manager.py", line 616, in load_provider
+    inst = cls_type(
+           ^^^^^^^^^
+  File "/Users/jaysen/Desktop/cb/twopixel-v2/astrbot/core/provider/sources/gemini_source.py", line 72, in __init__
+    self._init_client()
+  File "/Users/jaysen/Desktop/cb/twopixel-v2/astrbot/core/provider/sources/gemini_source.py", line 86, in _init_client
+    self.client = genai.Client(
+                  ^^^^^^^^^^^^^
+  File "/Users/jaysen/Desktop/cb/twopixel-v2/.venv/lib/python3.12/site-packages/google/genai/client.py", line 426, in __init__
+    self._api_client = self._get_api_client(
+                       ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/jaysen/Desktop/cb/twopixel-v2/.venv/lib/python3.12/site-packages/google/genai/client.py", line 474, in _get_api_client
+    return BaseApiClient(
+           ^^^^^^^^^^^^^^
+  File "/Users/jaysen/Desktop/cb/twopixel-v2/.venv/lib/python3.12/site-packages/google/genai/_api_client.py", line 707, in __init__
+    raise ValueError(
+ValueError: No API key was provided. Please pass a valid API key. Learn how to create an API key at https://ai.google.dev/gemini-api/docs/api-key.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/jaysen/Desktop/cb/twopixel-v2/astrbot/core/provider/manager.py", line 277, in initialize
+    await self.load_provider(provider_config)
+  File "/Users/jaysen/Desktop/cb/twopixel-v2/astrbot/core/provider/manager.py", line 666, in load_provider
+    raise Exception(
+Exception: 实例化 googlegenai_chat_completion(twopixel-gemini) 提供商适配器失败：No API key was provided. Please pass a valid API key. Learn how to create an API key at https://ai.google.dev/gemini-api/docs/api-key.
+[0m
+[32m[09:50:10.319][0m [Core] [31m[1m[ERRO][0m [v4.20.1] [provider.manager:280]: [31m[1m实例化 googlegenai_chat_completion(twopixel-gemini) 提供商适配器失败：No API key was provided. Please pass a valid API key. Learn how to create an API key at https://ai.google.dev/gemini-api/docs/api-key.[0m
+[32m[09:50:10.319][0m [Core] [1m[INFO][0m [provider.manager:521]: [1mProvider twopixel-moonshot is disabled, skipping[0m
+[32m[09:50:10.319][0m [Core] [1m[INFO][0m [provider.manager:526]: [1m载入 openai_chat_completion(twopixel-deepseek) 服务提供商 ...[0m
+[32m[09:50:10.432][0m [Core] [1m[INFO][0m [provider.manager:526]: [1m载入 openai_chat_completion(twopixel-qwen) 服务提供商 ...[0m
+[32m[09:50:10.436][0m [Core] [1m[INFO][0m [provider.manager:526]: [1m载入 zhipu_chat_completion(twopixel-glm) 服务提供商 ...[0m
+Task exception was never retrieved
+future: <Task finished name='Task-16' coro=<BaseApiClient.aclose() done, defined at /Users/jaysen/Desktop/cb/twopixel-v2/.venv/lib/python3.12/site-packages/google/genai/_api_client.py:1963> exception=AttributeError("'BaseApiClient' object has no attribute '_async_httpx_client'")>
+Traceback (most recent call last):
+  File "/Users/jaysen/Desktop/cb/twopixel-v2/.venv/lib/python3.12/site-packages/google/genai/_api_client.py", line 1968, in aclose
+    await self._async_httpx_client.aclose()
+          ^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'BaseApiClient' object has no attribute '_async_httpx_client'
+[32m[09:50:10.444][0m [Core] [1m[INFO][0m [knowledge_base.kb_mgr:40]: [1m正在初始化知识库模块...[0m
+[32m[09:50:10.445][0m [Core] [1m[INFO][0m [provider.func_tool_manager:398]: [1m等待 1 个 MCP 服务初始化...[0m
+[32m[09:50:10.460][0m [Core] [1m[INFO][0m [knowledge_base.kb_mgr:66]: [1mKnowledgeBase database initialized: /Users/jaysen/Desktop/cb/twopixel-v2/data/knowledge_base/kb.db[0m
+[32m[09:50:10.577][0m [Core] [1m[INFO][0m [dashboard.server:332]: [1m正在启动 WebUI, 监听地址: http://0.0.0.0:6185[0m
+[32m[09:50:10.577][0m [Core] [1m[INFO][0m [dashboard.server:334]: [1m提示: WebUI 将监听所有网络接口，请注意安全。（可在 data/cmd_config.json 中配置 dashboard.host 以修改 host）[0m
+[32m[09:50:10.578][0m [Core] [1m[INFO][0m [dashboard.server:371]: [1m
+ ✨✨✨
+  TwoPixel v4.20.1 WebUI 已启动，可访问
+
+   ➜  本地: http://localhost:6185
+   ➜  网络: http://127.0.0.1:6185
+   ➜  网络: http://192.168.1.4:6185
+   ➜  网络: http://26.26.26.1:6185
+   ➜  默认用户名和密码: astrbot
+ ✨✨✨
+[0m
+[32m[09:50:10.578][0m [Core] [1m[INFO][0m [core.core_lifecycle:297]: [1mAstrBot 启动完成。[0m
+[32m[09:50:10.580][0m [Core] [1m[INFO][0m [utils.temp_dir_cleaner:127]: [1mTempDirCleaner started. interval=600s cleanup_ratio=0.3[0m
+[2026-03-20 09:50:10 +0800] [50846] [INFO] Running on http://0.0.0.0:6185 (CTRL + C to quit)
+[32m[09:50:10.808][0m [Core] [1m[INFO][0m [t2i.network_strategy:56]: [1mSuccessfully got 2 official T2I endpoints.[0m
+[32m[09:50:11.571][0m [Core] [1m[INFO][0m [utils.llm_metadata:63]: [1mSuccessfully fetched metadata for 2207 LLMs.[0m
+[32m[09:50:11.730][0m [Core] [1m[INFO][0m [utils.log_pipe:31]: [1m[MCPServer-filesystem] Secure MCP Filesystem Server running on stdio[0m
+[32m[09:50:11.735][0m [Core] [1m[INFO][0m [utils.log_pipe:31]: [1m[MCPServer-filesystem] Client does not support MCP Roots, using allowed directories set from server args: [ '/Users/jaysen/Desktop/cb' ][0m
+[32m[09:50:11.769][0m [Core] [1m[INFO][0m [provider.func_tool_manager:611]: [1mConnected to MCP server filesystem, Tools: ['read_file', 'read_text_file', 'read_media_file', 'read_multiple_files', 'write_file', 'edit_file', 'create_directory', 'list_directory', 'list_directory_with_sizes', 'directory_tree', 'move_file', 'search_files', 'get_file_info', 'list_allowed_directories'][0m
+[32m[09:50:11.769][0m [Core] [1m[INFO][0m [provider.func_tool_manager:442]: [1mMCP services initialization completed: 1/1 successful, 0 failed.[0m

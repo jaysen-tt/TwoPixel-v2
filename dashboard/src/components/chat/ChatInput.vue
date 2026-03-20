@@ -1,16 +1,7 @@
 <template>
     <div class="input-area fade-in" @dragover.prevent="handleDragOver" @dragleave.prevent="handleDragLeave"
         @drop.prevent="handleDrop">
-        <div class="input-container" :style="{
-            width: '85%',
-            maxWidth: '900px',
-            margin: '0 auto',
-            border: isDark ? 'none' : '1px solid #e0e0e0',
-            borderRadius: '24px',
-            boxShadow: isDark ? 'none' : '0px 2px 2px rgba(0, 0, 0, 0.1)',
-            backgroundColor: isDark ? '#2d2d2d' : 'transparent',
-            position: 'relative'
-        }">
+        <div class="input-container" :class="{ 'input-container-dark': isDark }">
             <!-- 拖拽上传遮罩 -->
             <transition name="fade">
                 <div v-if="isDragging" class="drop-overlay">
@@ -32,9 +23,8 @@
                 </div>
             </transition>
             <textarea ref="inputField" v-model="localPrompt" @keydown="handleKeyDown" :disabled="disabled"
-                placeholder="Ask AstrBot..." class="chat-textarea"
-                autocomplete="off" autocorrect="off" autocapitalize="sentences" spellcheck="false"
-                style="width: 100%; resize: none; outline: none; border: 1px solid var(--v-theme-border); border-radius: 12px; padding: 16px 20px; min-height: 40px; max-height: 200px; overflow-y: auto; font-family: inherit; font-size: 16px; background-color: var(--v-theme-surface);"></textarea>
+                :placeholder="tm('input.placeholder')" class="chat-textarea"
+                autocomplete="off" autocorrect="off" autocapitalize="sentences" spellcheck="false"></textarea>
             <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 14px;">
                 <div
                     style="display: flex; justify-content: flex-start; margin-top: 4px; align-items: center; gap: 8px; min-width: 0; flex: 1; overflow: hidden;">
@@ -403,7 +393,7 @@ defineExpose({
     padding: 16px;
     background-color: transparent;
     position: relative;
-    border-top: 1px solid var(--v-theme-border);
+    border-top: none;
     flex-shrink: 0;
 }
 
@@ -459,6 +449,44 @@ defineExpose({
     gap: 8px;
     max-height: 500px;
     overflow: hidden;
+}
+
+.input-container {
+    width: 85%;
+    max-width: 900px;
+    margin: 0 auto;
+    border-radius: 24px;
+    position: relative;
+    border: 1px solid rgba(var(--v-theme-primary), 0.18);
+    background-color: rgba(var(--v-theme-surface), 0.6);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 10px 30px rgba(var(--v-theme-primary), 0.12), 0 0 0 1px rgba(var(--v-theme-primary), 0.1);
+}
+
+.input-container-dark {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background-color: rgba(20, 20, 20, 0.6);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.chat-textarea {
+    width: 100%;
+    resize: none;
+    outline: none;
+    border: none;
+    border-radius: 16px;
+    padding: 16px 20px;
+    min-height: 40px;
+    max-height: 200px;
+    overflow-y: auto;
+    font-family: inherit;
+    font-size: 16px;
+    background-color: transparent;
+    color: rgb(var(--v-theme-primaryText));
+}
+
+.chat-textarea::placeholder {
+    color: rgb(var(--v-theme-secondaryText));
 }
 
 /* Transition animations for reply preview */

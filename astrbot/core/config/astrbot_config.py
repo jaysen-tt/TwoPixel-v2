@@ -57,13 +57,206 @@ class AstrBotConfig(dict):
                 conf_str = conf_str[1:]
             conf = json.loads(conf_str)
 
-        # 检查配置完整性，并插入
         has_new = self.check_config_integrity(default_config, conf)
+
+        provider_sources = conf.setdefault("provider_sources", [])
+        providers = conf.setdefault("provider", [])
+
+        def upsert_provider_source(source_conf: dict) -> None:
+            nonlocal has_new
+            source_id = source_conf["id"]
+            for i, src in enumerate(provider_sources):
+                if src.get("id") == source_id:
+                    merged = dict(src)
+                    merged.update(source_conf)
+                    if merged != src:
+                        provider_sources[i] = merged
+                        has_new = True
+                    return
+            provider_sources.append(source_conf)
+            has_new = True
+
+        def upsert_provider(provider_conf: dict) -> None:
+            nonlocal has_new
+            provider_id = provider_conf["id"]
+            for i, p in enumerate(providers):
+                if p.get("id") == provider_id:
+                    merged = dict(p)
+                    merged.update(provider_conf)
+                    if merged != p:
+                        providers[i] = merged
+                        has_new = True
+                    return
+            providers.append(provider_conf)
+            has_new = True
+
+        def env_key_for(source_id: str) -> str:
+            return os.environ.get(
+                f"ASTRBOT_KEY_{source_id.upper().replace('-', '_')}",
+                "",
+            ).strip()
+
+        deepseek_source_id = "twopixel-deepseek_source"
+        gemini_source_id = "twopixel-gemini_source"
+        gemini_image_source_id = "twopixel-gemini_image_source"
+        qwen_source_id = "twopixel-qwen_source"
+        glm_source_id = "twopixel-glm_source"
+
+        upsert_provider_source(
+            {
+                "id": deepseek_source_id,
+                "provider": "deepseek",
+                "type": "openai_chat_completion",
+                "provider_type": "chat_completion",
+                "key": [env_key_for(deepseek_source_id)],
+                "api_base": "https://api.deepseek.com/v1",
+                "timeout": 120,
+                "proxy": "",
+                "custom_headers": {},
+            }
+        )
+        upsert_provider_source(
+            {
+                "id": gemini_source_id,
+                "provider": "google",
+                "type": "googlegenai_chat_completion",
+                "provider_type": "chat_completion",
+                "key": [env_key_for(gemini_source_id)],
+                "api_base": "https://generativelanguage.googleapis.com/",
+                "timeout": 120,
+                "gm_resp_image_modal": False,
+                "gm_native_search": False,
+                "gm_native_coderunner": False,
+                "gm_url_context": False,
+                "gm_safety_settings": {
+                    "harassment": "BLOCK_MEDIUM_AND_ABOVE",
+                    "hate_speech": "BLOCK_MEDIUM_AND_ABOVE",
+                    "sexually_explicit": "BLOCK_MEDIUM_AND_ABOVE",
+                    "dangerous_content": "BLOCK_MEDIUM_AND_ABOVE",
+                },
+                "proxy": "",
+                "custom_headers": {},
+            }
+        )
+        gemini_image_key = env_key_for(gemini_image_source_id) or env_key_for(gemini_source_id)
+        upsert_provider_source(
+            {
+                "id": gemini_image_source_id,
+                "provider": "google",
+                "type": "googlegenai_chat_completion",
+                "provider_type": "chat_completion",
+                "key": [gemini_image_key],
+                "api_base": "https://generativelanguage.googleapis.com/",
+                "timeout": 120,
+                "gm_resp_image_modal": True,
+                "gm_native_search": False,
+                "gm_native_coderunner": False,
+                "gm_url_context": False,
+                "gm_safety_settings": {
+                    "harassment": "BLOCK_MEDIUM_AND_ABOVE",
+                    "hate_speech": "BLOCK_MEDIUM_AND_ABOVE",
+                    "sexually_explicit": "BLOCK_MEDIUM_AND_ABOVE",
+                    "dangerous_content": "BLOCK_MEDIUM_AND_ABOVE",
+                },
+                "proxy": "",
+                "custom_headers": {},
+            }
+        )
+        upsert_provider_source(
+            {
+                "id": qwen_source_id,
+                "provider": "dashscope",
+                "type": "openai_chat_completion",
+                "provider_type": "chat_completion",
+                "key": [env_key_for(qwen_source_id)],
+                "api_base": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+                "timeout": 120,
+                "proxy": "",
+                "custom_headers": {},
+            }
+        )
+        upsert_provider_source(
+            {
+                "id": glm_source_id,
+                "provider": "zhipu",
+                "type": "zhipu_chat_completion",
+                "provider_type": "chat_completion",
+                "key": [env_key_for(glm_source_id)],
+                "api_base": "https://open.bigmodel.cn/api/paas/v4",
+                "timeout": 120,
+                "proxy": "",
+                "custom_headers": {},
+            }
+        )
+
+        upsert_provider(
+            {
+                "id": "twopixel-deepseek",
+                "model": "deepseek-chat",
+                "enable": True,
+                "provider_source_id": deepseek_source_id,
+                "modalities": [],
+                "custom_extra_body": {},
+            }
+        )
+        upsert_provider(
+            {
+                "id": "twopixel-gemini",
+                "model": "gemini-3-pro-preview",
+                "enable": True,
+                "provider_source_id": gemini_source_id,
+                "modalities": [],
+                "custom_extra_body": {},
+            }
+        )
+        upsert_provider(
+            {
+                "id": "twopixel-gemini-image",
+                "model": "nano-banana-pro-preview",
+                "enable": True,
+                "provider_source_id": gemini_image_source_id,
+                "modalities": [],
+                "custom_extra_body": {},
+            }
+        )
+        upsert_provider(
+            {
+                "id": "twopixel-qwen",
+                "model": "qwen-max",
+                "enable": True,
+                "provider_source_id": qwen_source_id,
+                "modalities": [],
+                "custom_extra_body": {},
+            }
+        )
+        upsert_provider(
+            {
+                "id": "twopixel-glm",
+                "model": "glm-5",
+                "enable": True,
+                "provider_source_id": glm_source_id,
+                "modalities": [],
+                "custom_extra_body": {},
+            }
+        )
+
+        for provider in providers:
+            if provider.get("id") == "twopixel-moonshot" and provider.get("enable") is not False:
+                provider["enable"] = False
+                has_new = True
+
+        for ps in provider_sources:
+            source_id = ps.get("id")
+            if not source_id:
+                continue
+            env_key = env_key_for(source_id)
+            if env_key and ps.get("key") != [env_key]:
+                ps["key"] = [env_key]
+                has_new = True
+
         self.update(conf)
         if has_new:
             self.save_config()
-
-        self.update(conf)
 
     def _config_schema_to_default_config(self, schema: dict) -> dict:
         """将 Schema 转换成 Config"""
@@ -151,15 +344,31 @@ class AstrBotConfig(dict):
 
         return has_new
 
-    def save_config(self, replace_config: dict | None = None) -> None:
-        """将配置写入文件
+    def save_config(self, conf: dict | None = None) -> None:
+        if conf is None:
+            conf = self
 
-        如果传入 replace_config，则将配置替换为 replace_config
-        """
-        if replace_config:
-            self.update(replace_config)
+        # Update self if a new conf is provided
+        if conf is not self:
+            self.clear()
+            self.update(conf)
+
+        # Prevent writing environment-injected API keys back to the config file
+        conf_to_save = self.copy()
+        if "provider_sources" in conf_to_save:
+            conf_to_save["provider_sources"] = []
+            for ps in self.get("provider_sources", []):
+                ps_copy = ps.copy()
+                # If the key was loaded from ENV, we should clear it or leave it as "" in the file
+                # But to be safe, we just clear all keys in the file and enforce ENV usage
+                if "id" in ps_copy:
+                    env_key_name = f"ASTRBOT_KEY_{ps_copy['id'].upper().replace('-', '_')}"
+                    if os.environ.get(env_key_name) and "key" in ps_copy:
+                        ps_copy["key"] = [""]
+                conf_to_save["provider_sources"].append(ps_copy)
+
         with open(self.config_path, "w", encoding="utf-8-sig") as f:
-            json.dump(self, f, indent=2, ensure_ascii=False)
+            json.dump(conf_to_save, f, indent=2, ensure_ascii=False)
 
     def __getattr__(self, item):
         try:

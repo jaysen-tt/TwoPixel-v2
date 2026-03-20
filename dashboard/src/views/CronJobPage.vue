@@ -53,7 +53,17 @@
           </template>
           <template #item.next_run_time="{ item }">{{ formatTime(item.next_run_time) }}</template>
           <template #item.last_run_at="{ item }">{{ formatTime(item.last_run_at) }}</template>
-          <template #item.note="{ item }">{{ item.note || tm('table.notAvailable') }}</template>
+          <template #item.note="{ item }">
+            <div>
+              <div>{{ item.note || tm('table.notAvailable') }}</div>
+              <div v-if="item.heartbeatStatus" class="text-caption text-medium-emphasis mt-1">
+                <v-chip size="x-small" color="indigo" variant="tonal" class="mr-1">
+                  HB {{ item.heartbeatStatus }}
+                </v-chip>
+                <span v-if="item.heartbeatTriggeredAt">{{ formatTime(item.heartbeatTriggeredAt) }}</span>
+              </div>
+            </div>
+          </template>
           <template #item.actions="{ item }">
             <div class="d-flex align-center flex-nowrap" style="gap: 12px; min-width: 140px;">
               <v-switch v-model="item.enabled" inset density="compact" hide-details color="primary"
@@ -171,7 +181,9 @@ async function loadJobs() {
       const data = Array.isArray(res.data.data) ? res.data.data : []
       jobs.value = data.map((job: any) => ({
         ...job,
-        session: job?.payload?.session || job?.session || ''
+        session: job?.payload?.session || job?.session || '',
+        heartbeatStatus: job?.payload?.heartbeat?.last_status || '',
+        heartbeatTriggeredAt: job?.payload?.heartbeat?.last_trigger_at || ''
       }))
     } else {
       toast(res.data.message || tm('messages.loadFailed'), 'error')

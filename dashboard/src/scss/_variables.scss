@@ -17,7 +17,7 @@ $cjk-mono-fallback: 'PingFang SC', 'PingFang TC', 'Hiragino Sans GB', 'Noto Sans
   --astrbot-font-cjk-mono: #{$cjk-mono-fallback};
 }
 
-$body-font-family: 'Roboto', $cjk-sans-fallback, sans-serif !default;
+$body-font-family: 'Inter', system-ui, sans-serif, $cjk-sans-fallback !default;
 $heading-font-family: $body-font-family !default;
 $btn-font-weight: 400 !default;
 $btn-letter-spacing: 0 !default;
@@ -129,4 +129,4 @@ $card-item-spacer-xy: 20px 24px !default;
 $card-text-spacer: 24px !default;
 $card-title-size: 18px !default;
 // Global Shadow
-$box-shadow: 1px 0 20px rgb(0 0 0 / 8%);
+$box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);

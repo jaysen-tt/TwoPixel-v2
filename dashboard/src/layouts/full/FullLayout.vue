@@ -2,8 +2,7 @@
 import { RouterView, useRoute } from 'vue-router';
 import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
-import VerticalSidebarVue from './vertical-sidebar/VerticalSidebar.vue';
-import VerticalHeaderVue from './vertical-header/VerticalHeader.vue';
+import RightSidebar from './right-sidebar/RightSidebar.vue';
 import MigrationDialog from '@/components/shared/MigrationDialog.vue';
 import ReadmeDialog from '@/components/shared/ReadmeDialog.vue';
 import Chat from '@/components/chat/Chat.vue';
@@ -20,10 +19,6 @@ const routerLoadingStore = useRouterLoadingStore();
 
 const isChatPage = computed(() => {
   return route.path.startsWith('/chat');
-});
-
-const showSidebar = computed(() => {
-  return customizer.viewMode === 'bot';
 });
 
 const showChatPage = computed(() => {
@@ -108,29 +103,36 @@ onMounted(() => {
         top
         style="z-index: 9999; position: absolute; opacity: 0.3; "
       />
-      <VerticalHeaderVue />
-      <VerticalSidebarVue v-if="showSidebar" />
-      <v-main :style="{
-        height: showChatPage ? 'calc(100vh - 55px)' : undefined,
-        overflow: showChatPage ? 'hidden' : undefined
-      }">
-        <v-container
-          fluid
-          class="page-wrapper"
-          :class="{ 'chat-mode-container': showChatPage }"
-          :style="{
-            height: showChatPage ? '100%' : 'calc(100% - 8px)',
-            padding: (isChatPage || showChatPage) ? '0' : undefined,
-            minHeight: showChatPage ? 'unset' : undefined
-          }">
-          <div :style="{ height: '100%', width: '100%', overflow: showChatPage ? 'hidden' : undefined }">
-            <div v-if="showChatPage" style="height: 100%; width: 100%; overflow: hidden;">
-              <Chat />
+      
+      <!-- New Layout Structure: Single Sidebar -> Content -->
+      <div class="tp-main-layout">
+        <!-- 2. Main Content Area -->
+        <v-main class="tp-content-area" :style="{
+          background: 'rgb(var(--v-theme-background))',
+          '--v-layout-left': '0px',
+          '--v-layout-top': '0px'
+        }">
+          <v-container
+            fluid
+            class="page-wrapper"
+            :class="{ 'chat-mode-container': showChatPage, 'tp-app-container': !showChatPage }"
+            :style="{
+              height: '100%',
+              padding: (isChatPage || showChatPage) ? '0' : undefined,
+              maxWidth: showChatPage ? 'none' : undefined
+            }">
+            <div :style="{ height: '100%', width: '100%', overflow: showChatPage ? 'hidden' : undefined }">
+              <div v-if="showChatPage" style="height: 100%; width: 100%; overflow: hidden;">
+                <Chat />
+              </div>
+              <RouterView v-else />
             </div>
-            <RouterView v-else />
-          </div>
-        </v-container>
-      </v-main>
+          </v-container>
+        </v-main>
+
+        <!-- 3. Right Sidebar (Tools & Settings) -->
+        <RightSidebar />
+      </div>
 
       <MigrationDialog ref="migrationDialog" />
       <ReadmeDialog
@@ -143,9 +145,38 @@ onMounted(() => {
 </template>
 
 <style scoped>
+.tp-main-layout {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.tp-content-area {
+  flex: 1;
+  height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
 .chat-mode-container {
   min-height: unset !important;
   height: 100% !important;
   overflow: hidden !important;
+  max-width: none !important;
+}
+
+.tp-app-container {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 24px 32px !important;
+  flex: 1;
+}
+
+@media (max-width: 768px) {
+  .tp-app-container {
+    padding: 16px !important;
+  }
 }
 </style>

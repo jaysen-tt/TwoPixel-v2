@@ -21,6 +21,7 @@ from .static_file import StaticFileRoute
 from .subagent import SubAgentRoute
 from .tools import ToolsRoute
 from .update import UpdateRoute
+from .user_profile import UserProfileRoute
 
 __all__ = [
     "ApiKeyRoute",
@@ -46,4 +47,5 @@ __all__ = [
     "ToolsRoute",
     "SkillsRoute",
     "UpdateRoute",
+    "UserProfileRoute",
 ]

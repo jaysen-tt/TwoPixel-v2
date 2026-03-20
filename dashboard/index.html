@@ -2,10 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta name="keywords" content="AstrBot Soulter" />
-    <meta name="description" content="AstrBot Dashboard" />
+    <meta name="keywords" content="TwoPixel AI Agent" />
+    <meta name="description" content="TwoPixel Dashboard" />
     <meta name="robots" content="noindex, nofollow" />
     <link
       rel="stylesheet"
@@ -14,10 +14,36 @@
     <!-- VAD (Voice Activity Detection) Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.22.0/dist/ort.wasm.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@ricky0123/vad-web@0.0.29/dist/bundle.min.js"></script>
-    <title>AstrBot - 仪表盘</title>
+    <title>TwoPixel - 控制台</title>
   </head>
   <body>
     <div id="app"></div>
+    <script>
+      window.addEventListener('error', function(event) {
+        const errorMsg = document.createElement('div');
+        errorMsg.style.color = 'red';
+        errorMsg.style.padding = '20px';
+        errorMsg.style.fontFamily = 'monospace';
+        errorMsg.style.zIndex = '9999';
+        errorMsg.style.position = 'fixed';
+        errorMsg.style.top = '0';
+        errorMsg.style.background = 'white';
+        errorMsg.innerText = 'App Error: ' + event.message + '\n' + event.filename + ':' + event.lineno;
+        document.body.appendChild(errorMsg);
+      });
+      window.addEventListener('unhandledrejection', function(event) {
+        const errorMsg = document.createElement('div');
+        errorMsg.style.color = 'red';
+        errorMsg.style.padding = '20px';
+        errorMsg.style.fontFamily = 'monospace';
+        errorMsg.style.zIndex = '9999';
+        errorMsg.style.position = 'fixed';
+        errorMsg.style.top = '50px';
+        errorMsg.style.background = 'white';
+        errorMsg.innerText = 'Promise Rejection: ' + (event.reason && event.reason.message ? event.reason.message : event.reason);
+        document.body.appendChild(errorMsg);
+      });
+    </script>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

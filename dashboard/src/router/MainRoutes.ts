@@ -5,18 +5,18 @@ const MainRoutes = {
   meta: {
     requiresAuth: true
   },
-  redirect: '/welcome',
+  redirect: '/chat',
   component: () => import('@/layouts/full/FullLayout.vue'),
   children: [
     {
       name: 'MainPage',
       path: '/',
-      component: () => import('@/views/WelcomePage.vue')
+      redirect: '/chat'
     },
     {
       name: 'Welcome',
       path: '/welcome',
-      component: () => import('@/views/WelcomePage.vue')
+      redirect: '/chat'
     },
     {
       name: EXTENSION_ROUTE_NAME,

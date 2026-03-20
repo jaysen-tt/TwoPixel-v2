@@ -38,16 +38,16 @@ onMounted(() => {
 
 <template>
   <div class="login-page-container">
-    <v-card class="login-card" elevation="1">
-      <v-card-title>
-        <div class="d-flex justify-space-between align-center w-100">
-          <img width="80" src="@/assets/images/icon-no-shadow.svg" alt="AstrBot Logo">
-          <div class="d-flex align-center gap-1">
+    <v-card class="login-card" elevation="2" rounded="xl">
+      <v-card-title class="pt-6 px-6">
+        <div class="d-flex justify-space-between align-center w-100 mb-6">
+          <img width="64" src="@/assets/images/astrbot_logo_mini.webp" alt="TwoPixel Logo" style="border-radius: 16px;">
+          <div class="d-flex align-center gap-2">
             <LanguageSwitcher />
             <v-divider vertical class="mx-1"
-              style="height: 24px !important; opacity: 0.9 !important; align-self: center !important; border-color: rgba(var(--v-theme-primary), 0.45) !important;"></v-divider>
-            <v-btn @click="toggleTheme" class="theme-toggle-btn" icon variant="text" size="small">
-              <v-icon size="18" :color="'rgb(var(--v-theme-primary))'">
+              style="height: 16px !important; opacity: 0.3 !important; align-self: center !important;"></v-divider>
+            <v-btn @click="toggleTheme" class="theme-toggle-btn" icon variant="text" size="small" color="default">
+              <v-icon size="20">
                 mdi-white-balance-sunny
               </v-icon>
               <v-tooltip activator="parent" location="top">
@@ -56,10 +56,10 @@ onMounted(() => {
             </v-btn>
           </div>
         </div>
-        <div class="ml-2" style="font-size: 26px;">{{ t('logo.title') }}</div>
-        <div class="mt-2 ml-2" style="font-size: 14px; color: grey;">{{ t('logo.subtitle') }}</div>
+        <div class="text-h5 font-weight-medium mb-1" style="color: rgb(var(--v-theme-on-surface)); letter-spacing: -0.5px !important;">{{ t('logo.title') }}</div>
+        <div class="text-body-2" style="color: rgb(var(--v-theme-on-surface-variant));">{{ t('logo.subtitle') }}</div>
       </v-card-title>
-      <v-card-text>
+      <v-card-text class="px-6 pb-8">
         <AuthLogin />
       </v-card-text>
     </v-card>
@@ -68,7 +68,7 @@ onMounted(() => {
 
 <style lang="scss">
 .login-page-container {
-  background-color: rgb(var(--v-theme-containerBg));
+  background-color: rgb(var(--v-theme-background));
   position: relative;
   width: 100vw;
   height: 100vh;
@@ -79,7 +79,10 @@ onMounted(() => {
 }
 
 .login-card {
-  width: 400px;
-  padding: 8px;
+  width: 100%;
+  max-width: 420px;
+  background: rgb(var(--v-theme-surface));
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
+  box-shadow: 0 10px 40px -10px rgba(0,0,0,0.08) !important;
 }
 </style>

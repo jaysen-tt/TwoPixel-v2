@@ -484,7 +484,7 @@ onMounted(async () => {
     </v-btn>
 
     <div class="logo-container" :class="{ 'mobile-logo': $vuetify.display.xs, 'chat-mode-logo': customizer.viewMode === 'chat' }" @click="handleLogoClick">
-      <span class="logo-text Outfit">Astr<span class="logo-text bot-text-wrapper">Bot
+      <span class="logo-text Outfit">Two<span class="logo-text bot-text-wrapper">Pixel
         <img v-if="isChristmas" src="@/assets/images/xmas-hat.png" alt="Christmas hat" class="xmas-hat" />
       </span></span>
       <span class="logo-text logo-text-light Outfit" style="color: grey;" v-if="customizer.viewMode === 'chat'">ChatUI</span>

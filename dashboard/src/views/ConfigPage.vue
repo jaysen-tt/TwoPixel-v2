@@ -242,9 +242,10 @@ export default {
     };
   },
 
-// 检查未保存的更改
+  // 检查未保存的更改
   async beforeRouteLeave(to, from, next) {
-    if (this.hasUnsavedChanges) {
+    // Check if the component instance exists and has the property
+    if (this && typeof this.hasUnsavedChanges !== 'undefined' && this.hasUnsavedChanges) {
       const confirmed = await this.$refs.unsavedChangesDialog?.open({
         title: this.tm('unsavedChangesWarning.dialogTitle'),
         message: this.tm('unsavedChangesWarning.leavePage'),
@@ -305,12 +306,6 @@ export default {
         umop: []
       });
       return items;
-    },
-    hasUnsavedChanges() {
-      if (!this.fetched) {
-        return false;
-      }
-      return this.getConfigSnapshot(this.config_data) !== this.lastSavedConfigSnapshot;
     }
   },
   watch: {

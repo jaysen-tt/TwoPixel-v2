@@ -209,6 +209,15 @@ class CronJobManager:
             status = "failed"
             last_error = str(e)
             logger.error(f"Cron job {job_id} failed: {e!s}", exc_info=True)
+            try:
+                if isinstance(job.payload, dict) and isinstance(
+                    job.payload.get("heartbeat"), dict
+                ):
+                    await self._update_heartbeat_runtime_status(
+                        job, status="failed", note=last_error[:200]
+                    )
+            except Exception:
+                pass
         finally:
             next_run = self._get_next_run_time(job_id)
             await self.db.update_cron_job(
@@ -236,6 +245,17 @@ class CronJobManager:
         session_str = payload.get("session")
         if not session_str:
             raise ValueError("ActiveAgentCronJob missing session.")
+        heartbeat_cfg = payload.get("heartbeat") if isinstance(payload, dict) else None
+        if isinstance(heartbeat_cfg, dict):
+            await self._update_heartbeat_runtime_status(
+                job, status="running", note="heartbeat running"
+            )
+            if not self._is_within_active_hours(heartbeat_cfg):
+                logger.info("Heartbeat skipped (outside active hours): %s", job.job_id)
+                await self._update_heartbeat_runtime_status(
+                    job, status="skipped_hours", note="outside active hours"
+                )
+                return
         note = payload.get("note") or job.description or job.name
 
         extras = {
@@ -253,12 +273,59 @@ class CronJobManager:
             },
             "cron_payload": payload,
         }
+        if isinstance(heartbeat_cfg, dict):
+            extras["heartbeat"] = heartbeat_cfg
 
         await self._woke_main_agent(
             message=note,
             session_str=session_str,
             extras=extras,
         )
+
+    async def _update_heartbeat_runtime_status(
+        self, job: CronJob, status: str, note: str = ""
+    ) -> None:
+        payload = dict(job.payload or {})
+        heartbeat = dict(payload.get("heartbeat") or {})
+        heartbeat["last_status"] = status
+        heartbeat["last_status_note"] = note
+        heartbeat["last_trigger_at"] = datetime.now(timezone.utc).isoformat()
+        payload["heartbeat"] = heartbeat
+        updated = await self.update_job(job.job_id, payload=payload)
+        if updated:
+            job.payload = updated.payload
+
+    def _is_within_active_hours(self, heartbeat_cfg: dict) -> bool:
+        active_hours = heartbeat_cfg.get("active_hours")
+        if not isinstance(active_hours, dict):
+            return True
+        if not active_hours.get("enable", False):
+            return True
+        start = str(active_hours.get("start", "08:00"))
+        end = str(active_hours.get("end", "23:00"))
+        tz_name = str(active_hours.get("timezone", "")).strip()
+        tzinfo = timezone.utc
+        if tz_name:
+            try:
+                tzinfo = ZoneInfo(tz_name)
+            except Exception:
+                tzinfo = datetime.now().astimezone().tzinfo or timezone.utc
+        else:
+            tzinfo = datetime.now().astimezone().tzinfo or timezone.utc
+        now = datetime.now(tzinfo)
+        try:
+            start_h, start_m = [int(x) for x in start.split(":")]
+            end_h, end_m = [int(x) for x in end.split(":")]
+        except Exception:
+            return True
+        now_minutes = now.hour * 60 + now.minute
+        start_minutes = start_h * 60 + start_m
+        end_minutes = end_h * 60 + end_m
+        if start_minutes == end_minutes:
+            return True
+        if start_minutes < end_minutes:
+            return start_minutes <= now_minutes < end_minutes
+        return now_minutes >= start_minutes or now_minutes < end_minutes
 
     async def _woke_main_agent(
         self,
@@ -306,6 +373,8 @@ class CronJobManager:
             cron_event.role = "admin" if sender_id in admin_ids else "member"
         if cron_payload.get("origin", "tool") == "api":
             cron_event.role = "admin"
+        heartbeat_cfg = extras.get("heartbeat", {}) if extras else {}
+        is_heartbeat = isinstance(heartbeat_cfg, dict) and bool(heartbeat_cfg)
 
         config = MainAgentBuildConfig(
             tool_call_timeout=3600,
@@ -331,15 +400,37 @@ class CronJobManager:
         req.system_prompt += PROACTIVE_AGENT_CRON_WOKE_SYSTEM_PROMPT.format(
             cron_job=cron_job_str
         )
-        req.prompt = (
-            "You are now responding to a scheduled task. "
-            "Proceed according to your system instructions. "
-            "Output using same language as previous conversation. "
-            "After completing your task, summarize and output your actions and results."
-        )
+        if is_heartbeat:
+            heartbeat_prompt = str(
+                heartbeat_cfg.get(
+                    "prompt",
+                    "Read current context and decide if anything needs attention. If no action is needed, reply HEARTBEAT_OK.",
+                )
+            ).strip()
+            heartbeat_target = str(heartbeat_cfg.get("target", "last")).strip().lower()
+            req.prompt = heartbeat_prompt
+            req.system_prompt += (
+                "\nHeartbeat mode: this is a periodic low-disturbance check. "
+                "If there is no urgent update, reply HEARTBEAT_OK only. "
+                "Only provide user-facing content when there is actionable attention."
+            )
+            if heartbeat_target == "none":
+                req.system_prompt += (
+                    " Do not send messages to user in this run."
+                )
+        else:
+            req.prompt = (
+                "You are now responding to a scheduled task. "
+                "Proceed according to your system instructions. "
+                "Output using same language as previous conversation. "
+                "After completing your task, summarize and output your actions and results."
+            )
         if not req.func_tool:
             req.func_tool = ToolSet()
-        req.func_tool.add_tool(SEND_MESSAGE_TO_USER_TOOL)
+        if (not is_heartbeat) or (
+            str(heartbeat_cfg.get("target", "last")).strip().lower() != "none"
+        ):
+            req.func_tool.add_tool(SEND_MESSAGE_TO_USER_TOOL)
 
         result = await build_main_agent(
             event=cron_event, plugin_context=self.ctx, config=config, req=req
@@ -353,6 +444,17 @@ class CronJobManager:
             # agent will send message to user via using tools
             pass
         llm_resp = runner.get_final_llm_resp()
+        if is_heartbeat and llm_resp and llm_resp.role == "assistant":
+            ack_max_chars = int(heartbeat_cfg.get("ack_max_chars", 240))
+            if self._is_heartbeat_ok_response(llm_resp.completion_text, ack_max_chars):
+                cron_job_id = str(extras.get("cron_job", {}).get("id", "") if extras else "")
+                if cron_job_id:
+                    latest_job = await self.db.get_cron_job(cron_job_id)
+                    if latest_job:
+                        await self._update_heartbeat_runtime_status(
+                            latest_job, status="ack_ok", note="suppressed by HEARTBEAT_OK"
+                        )
+                return
         cron_meta = extras.get("cron_job", {}) if extras else {}
         summary_note = (
             f"[CronJob] {cron_meta.get('name') or cron_meta.get('id', 'unknown')}: {cron_meta.get('description', '')} "
@@ -371,7 +473,38 @@ class CronJobManager:
         )
         if not llm_resp:
             logger.warning("Cron job agent got no response")
+            if is_heartbeat:
+                cron_job_id = str(extras.get("cron_job", {}).get("id", "") if extras else "")
+                if cron_job_id:
+                    latest_job = await self.db.get_cron_job(cron_job_id)
+                    if latest_job:
+                        await self._update_heartbeat_runtime_status(
+                            latest_job, status="no_response", note="no assistant response"
+                        )
             return
+        if is_heartbeat:
+            cron_job_id = str(extras.get("cron_job", {}).get("id", "") if extras else "")
+            if cron_job_id:
+                latest_job = await self.db.get_cron_job(cron_job_id)
+                if latest_job:
+                    await self._update_heartbeat_runtime_status(
+                        latest_job, status="delivered", note="heartbeat message delivered"
+                    )
+
+    def _is_heartbeat_ok_response(self, text: str, ack_max_chars: int) -> bool:
+        body = str(text or "").strip()
+        if not body:
+            return True
+        normalized = body.upper()
+        if normalized == "HEARTBEAT_OK":
+            return True
+        if normalized.startswith("HEARTBEAT_OK"):
+            tail = body[len("HEARTBEAT_OK") :].strip(" \n\t:：-")
+            return len(tail) <= ack_max_chars
+        if normalized.endswith("HEARTBEAT_OK"):
+            head = body[: -len("HEARTBEAT_OK")].strip(" \n\t:：-")
+            return len(head) <= ack_max_chars
+        return False
 
 
 __all__ = ["CronJobManager"]

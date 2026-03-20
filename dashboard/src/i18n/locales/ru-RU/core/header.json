@@ -1,7 +1,7 @@
-﻿{
-    "logoTitle": "Панель управления AstrBot",
+{
+    "logoTitle": "Панель управления TwoPixel",
     "version": {
-        "hasNewVersion": "Доступна новая версия AstrBot!",
+        "hasNewVersion": "Доступна новая версия TwoPixel!",
         "dashboardHasNewVersion": "Доступна новая версия WebUI!"
     },
     "buttons": {
@@ -13,7 +13,7 @@
         }
     },
     "updateDialog": {
-        "title": "Обновить AstrBot",
+        "title": "Обновить TwoPixel",
         "currentVersion": "Текущая версия",
         "status": {
             "checking": "Проверка обновлений...",
@@ -55,12 +55,12 @@
             "currentVersion": "Текущая версия:",
             "guideTitle": "Рекомендации после перехода:",
             "guideStep1": "Загрузите пакет, соответствующий архитектуре вашей системы.",
-            "guideStep2": "После завершения установки перезапустите AstrBot.",
+            "guideStep2": "После завершения установки перезапустите TwoPixel.",
             "guideStep3": "Если вы используете Docker, отдайте приоритет обновлению через образ."
         },
         "desktopApp": {
             "title": "Обновить десктопное приложение",
-            "message": "Проверка и обновление десктопной версии AstrBot.",
+            "message": "Проверка и обновление десктопной версии TwoPixel.",
             "currentVersion": "Текущая версия:",
             "latestVersion": "Последняя версия:",
             "checking": "Проверка обновлений десктопного приложения...",
@@ -89,7 +89,7 @@
             "passwordHint": "Пароль должен быть не менее 8 символов",
             "confirmPasswordHint": "Введите новый пароль еще раз",
             "usernameHint": "Оставьте пустым, если не хотите менять имя пользователя",
-            "defaultCredentials": "Логин и пароль по умолчанию: astrbot"
+            "defaultCredentials": "Логин и пароль по умолчанию: twopixel"
         },
         "validation": {
             "passwordRequired": "Введите пароль",

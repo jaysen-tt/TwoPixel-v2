@@ -169,7 +169,7 @@ class AstrBotUpdator(RepoZipUpdator):
             if len(str(version)) != 40:
                 raise Exception("commit hash 长度不正确，应为 40")
             file_url = f"https://github.com/AstrBotDevs/AstrBot/archive/{version}.zip"
-        logger.info(f"准备更新至指定版本的 AstrBot Core: {version}")
+        logger.info(f"准备更新至指定版本的 TwoPixel Core: {version}")
 
         if proxy:
             proxy = proxy.removesuffix("/")
@@ -177,7 +177,7 @@ class AstrBotUpdator(RepoZipUpdator):
 
         try:
             await download_file(file_url, "temp.zip")
-            logger.info("下载 AstrBot Core 更新文件完成，正在执行解压...")
+            logger.info("下载 TwoPixel Core 更新文件完成，正在执行解压...")
             self.unzip_file("temp.zip", self.MAIN_PATH)
         except BaseException as e:
             raise e

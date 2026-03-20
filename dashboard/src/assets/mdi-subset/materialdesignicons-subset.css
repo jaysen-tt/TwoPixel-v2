@@ -1,4 +1,4 @@
-/* Auto-generated MDI subset – 229 icons */
+/* Auto-generated MDI subset – 237 icons */
 /* Do not edit manually. Run: pnpm run subset-icons */
 
 @font-face {
@@ -132,6 +132,14 @@
   content: "\F0679";
 }
 
+.mdi-camera-outline::before {
+  content: "\F0D5D";
+}
+
+.mdi-chart-line::before {
+  content: "\F012A";
+}
+
 .mdi-chat::before {
   content: "\F0B79";
 }
@@ -166,10 +174,6 @@
 
 .mdi-checkbox-marked::before {
   content: "\F0132";
-}
-
-.mdi-checkbox-multiple-marked-outline::before {
-  content: "\F0139";
 }
 
 .mdi-chevron-double-left::before {
@@ -298,6 +302,10 @@
 
 .mdi-database-off::before {
   content: "\F1640";
+}
+
+.mdi-database-outline::before {
+  content: "\F1632";
 }
 
 .mdi-delete::before {
@@ -584,6 +592,10 @@
   content: "\F033E";
 }
 
+.mdi-lock-check::before {
+  content: "\F139A";
+}
+
 .mdi-lock-check-outline::before {
   content: "\F16A8";
 }
@@ -594,6 +606,10 @@
 
 .mdi-lock-plus-outline::before {
   content: "\F16B2";
+}
+
+.mdi-logout-variant::before {
+  content: "\F05FD";
 }
 
 .mdi-magnify::before {
@@ -610,6 +626,10 @@
 
 .mdi-message-off-outline::before {
   content: "\F164E";
+}
+
+.mdi-message-outline::before {
+  content: "\F0365";
 }
 
 .mdi-message-text::before {
@@ -662,6 +682,14 @@
 
 .mdi-package-variant::before {
   content: "\F03D6";
+}
+
+.mdi-page-layout-sidebar-left::before {
+  content: "\F06FD";
+}
+
+.mdi-page-layout-sidebar-right::before {
+  content: "\F06FE";
 }
 
 .mdi-pause::before {
@@ -804,10 +832,6 @@
   content: "\F062C";
 }
 
-.mdi-square-edit-outline::before {
-  content: "\F090C";
-}
-
 .mdi-star::before {
   content: "\F04CE";
 }
@@ -896,8 +920,16 @@
   content: "\F056E";
 }
 
+.mdi-view-dashboard-outline::before {
+  content: "\F0A1D";
+}
+
 .mdi-view-grid::before {
   content: "\F0570";
+}
+
+.mdi-view-grid-outline::before {
+  content: "\F11D9";
 }
 
 .mdi-view-list::before {

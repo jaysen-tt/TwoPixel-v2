@@ -4,7 +4,7 @@
             <v-chip v-bind="menuProps" class="text-none provider-chip" variant="tonal" :size="chipSize">
                 <v-icon start size="14">mdi-creation</v-icon>
                 <span v-if="selectedProviderId">
-                    {{ selectedProviderId }}
+                    {{ formatProviderId(selectedProviderId) }}
                 </span>
                 <span v-else>Model</span>
             </v-chip>
@@ -26,7 +26,7 @@
                     <v-list-item v-for="provider in filteredProviders" :key="provider.id"
                         :active="selectedProviderId === provider.id" @click="selectProvider(provider)" rounded="lg"
                         class="provider-menu-item">
-                        <v-list-item-title class="text-body-2">{{ provider.id }}</v-list-item-title>
+                        <v-list-item-title class="text-body-2">{{ formatProviderId(provider.id) }}</v-list-item-title>
                         <v-list-item-subtitle class="provider-subtitle">
                             <span class="model-name">{{ provider.model }}</span>
                             <span class="meta-icons">
@@ -96,6 +96,11 @@ const filteredProviders = computed(() => {
     );
 });
 
+function formatProviderId(id: string): string {
+    if (!id) return '';
+    return id.replace(/^twopixel-/, '');
+}
+
 function loadFromStorage() {
     const savedProvider = localStorage.getItem('selectedProvider');
     if (savedProvider) {
@@ -115,9 +120,17 @@ function loadProviderConfigs() {
     }).then(response => {
         if (response.data.status === 'ok') {
             // 过滤掉 enable 为 false 的配置
+            // 由于用户需要常驻所有配置的四个模型，我们只展示这些特定的模型
+            const allowedModels = ['twopixel-deepseek', 'twopixel-gemini', 'twopixel-gemini-image', 'twopixel-qwen', 'twopixel-glm'];
             providerConfigs.value = (response.data.data || []).filter(
-                (p: ProviderConfig) => p.enable !== false
+                (p: ProviderConfig) => p.enable !== false && allowedModels.includes(p.id)
             );
+            
+            // 如果当前选中的模型不在列表中，自动选中第一个
+            if (providerConfigs.value.length > 0 && !providerConfigs.value.find(p => p.id === selectedProviderId.value)) {
+                selectedProviderId.value = providerConfigs.value[0].id;
+                saveToStorage();
+            }
         }
     }).catch(error => {
         console.error('获取提供商列表失败:', error);

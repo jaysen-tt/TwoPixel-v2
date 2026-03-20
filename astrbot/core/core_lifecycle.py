@@ -103,7 +103,7 @@ class AstrBotCoreLifecycle:
         负责初始化各个组件, 包括 ProviderManager、PlatformManager、ConversationManager、PluginManager、PipelineScheduler、EventBus、AstrBotUpdator等。
         """
         # 初始化日志代理
-        logger.info("AstrBot v" + VERSION)
+        logger.info("TwoPixel v" + VERSION)
         if os.environ.get("TESTING", ""):
             LogManager.configure_logger(
                 logger, self.astrbot_config, override_level="DEBUG"
@@ -143,7 +143,7 @@ class AstrBotCoreLifecycle:
                 self.astrbot_config_mgr,
             )
         except Exception as e:
-            logger.error(f"AstrBot migration failed: {e!s}")
+            logger.error(f"TwoPixel migration failed: {e!s}")
             logger.error(traceback.format_exc())
 
         # 初始化事件队列
@@ -294,7 +294,7 @@ class AstrBotCoreLifecycle:
         用load加载事件总线和任务并初始化, 执行启动完成事件钩子
         """
         self._load()
-        logger.info("AstrBot 启动完成。")
+        logger.info("TwoPixel 启动完成。")
 
         # 执行启动完成事件钩子
         handlers = star_handlers_registry.get_handlers_by_event_type(

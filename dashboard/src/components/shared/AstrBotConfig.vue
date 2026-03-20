@@ -139,6 +139,11 @@ function getValueBySelector(obj, selector) {
 }
 
 function shouldShowItem(itemMeta, itemKey) {
+  // HIDDEN FOR SECURITY: Do not show the API key input in the frontend
+  if (itemKey === 'key' && props.metadataKey === 'provider') {
+    return false;
+  }
+  
   if (!itemMeta?.condition) {
     return true
   }

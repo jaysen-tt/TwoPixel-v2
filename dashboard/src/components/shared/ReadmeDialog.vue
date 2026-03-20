@@ -362,18 +362,21 @@ const showActionArea = computed(() => {
   const hasGithub = modeConfig.value.showGithubButton && !!props.repoUrl;
   return hasGithub || modeConfig.value.showRefreshButton;
 });
+
+const isFirstNoticeMode = computed(() => props.mode === "first-notice");
+const dialogWidth = computed(() => (isFirstNoticeMode.value ? 960 : 800));
 </script>
 
 <template>
-  <v-dialog v-model="_show" width="800">
-    <v-card>
-      <v-card-title class="d-flex justify-space-between align-center">
+  <v-dialog v-model="_show" :width="dialogWidth" class="tp-dialog-shell">
+    <v-card class="tp-dialog-card" :class="{ 'tp-first-notice-card': isFirstNoticeMode }">
+      <v-card-title class="d-flex justify-space-between align-center tp-dialog-title">
         <span class="text-h2 pa-2">{{ modeConfig.title }}</span>
         <v-btn icon @click="_show = false" variant="text">
           <v-icon>mdi-close</v-icon>
         </v-btn>
       </v-card-title>
-      <v-card-text ref="scrollContainer" style="overflow-y: auto">
+      <v-card-text ref="scrollContainer" class="tp-dialog-content" :class="{ 'tp-first-notice-content': isFirstNoticeMode }">
         <div v-if="showActionArea" class="d-flex justify-space-between mb-4">
           <v-btn
             v-if="modeConfig.showGithubButton && repoUrl"
@@ -446,7 +449,7 @@ const showActionArea = computed(() => {
           </p>
         </div>
       </v-card-text>
-      <v-card-actions>
+      <v-card-actions class="tp-dialog-actions" :class="{ 'tp-first-notice-actions': isFirstNoticeMode }">
         <v-spacer></v-spacer>
         <v-btn color="primary" variant="tonal" @click="_show = false">
           {{ t("core.common.close") }}
@@ -457,6 +460,57 @@ const showActionArea = computed(() => {
 </template>
 
 <style scoped>
+:deep(.tp-dialog-shell .v-overlay__content) {
+  max-height: 92vh;
+}
+
+.tp-dialog-card {
+  border-radius: 22px !important;
+  border: 1px solid rgba(var(--v-theme-border), 0.55);
+  box-shadow: 0 18px 52px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.tp-dialog-title {
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(var(--v-theme-border), 0.4);
+  background: linear-gradient(
+    180deg,
+    rgba(var(--v-theme-surface), 0.82) 0%,
+    rgba(var(--v-theme-surface), 0.62) 100%
+  );
+}
+
+.tp-dialog-content {
+  max-height: calc(92vh - 132px);
+  overflow-y: auto;
+}
+
+.tp-dialog-actions {
+  padding: 12px 16px 16px;
+  border-top: 1px solid rgba(var(--v-theme-border), 0.35);
+}
+
+.tp-first-notice-card {
+  background: linear-gradient(
+    145deg,
+    rgba(var(--v-theme-background), 0.98) 0%,
+    rgba(var(--v-theme-surface), 0.92) 100%
+  );
+}
+
+.tp-first-notice-content {
+  padding: 18px 24px 12px !important;
+}
+
+:deep(.tp-first-notice-content .markdown-body h1:first-child) {
+  margin-top: 0;
+}
+
+.tp-first-notice-actions {
+  background: rgba(var(--v-theme-surface), 0.6);
+}
+
 :deep(.markdown-body) {
   --markdown-border: rgba(128, 128, 128, 0.3);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,

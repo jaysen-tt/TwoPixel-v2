@@ -2,32 +2,48 @@
 import { ref, useCssModule } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { Form } from 'vee-validate';
-import md5 from 'js-md5';
 import { useModuleI18n } from '@/i18n/composables';
 
 const { tm: t } = useModuleI18n('features/auth');
 
 const valid = ref(false);
 const show1 = ref(false);
+const show2 = ref(false);
 const password = ref('');
+const confirmPassword = ref('');
 const username = ref('');
 const loading = ref(false);
+const mode = ref<'login' | 'signup'>('login');
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 async function validate(values: any, { setErrors }: any) {
   loading.value = true;
 
-  // md5加密
-  let password_ = password.value;
-  if (password.value != '') {
-    // @ts-ignore
-    password_ = md5(password.value);
+  const normalizedUsername = String(username.value || '').trim();
+  const isEmailLogin = normalizedUsername.includes('@');
+  if (mode.value === 'login' && !isEmailLogin) {
+    setErrors({ apiError: t('loginEmailRequired') });
+    loading.value = false;
+    return;
+  }
+  if (mode.value === 'signup' && !isEmailLogin) {
+    setErrors({ apiError: t('signupEmailRequired') });
+    loading.value = false;
+    return;
+  }
+  if (mode.value === 'signup' && String(password.value || '') !== String(confirmPassword.value || '')) {
+    setErrors({ apiError: t('signupPasswordMismatch') });
+    loading.value = false;
+    return;
   }
 
   const authStore = useAuthStore();
   // @ts-ignore
   authStore.returnUrl = new URLSearchParams(window.location.search).get('redirect');
-  return authStore.login(username.value, password_).then((res) => {
+  const runner = mode.value === 'signup'
+    ? authStore.signup(normalizedUsername, password.value)
+    : authStore.login(normalizedUsername, password.value);
+  return runner.then((res) => {
     console.log(res);
     loading.value = false;
   }).catch((err) => {
@@ -40,21 +56,47 @@ async function validate(values: any, { setErrors }: any) {
 
 <template>
   <Form @submit="validate" class="mt-4 login-form" v-slot="{ errors, isSubmitting }">
-    <v-text-field v-model="username" :label="t('username')" class="mb-6 input-field" required hide-details="auto"
-      variant="outlined" prepend-inner-icon="mdi-account" :disabled="loading"></v-text-field>
-
-    <v-text-field v-model="password" :label="t('password')" required variant="outlined" hide-details="auto"
-      :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'" :type="show1 ? 'text' : 'password'"
-      @click:append="show1 = !show1" class="pwd-input" prepend-inner-icon="mdi-lock" :disabled="loading"></v-text-field>
-
-    <div class="mt-2">
-      <small style="color: grey;">{{ t('defaultHint') }}</small>
+    <div class="mode-switch mb-6">
+      <v-btn 
+        class="text-body-2 font-weight-medium"
+        :variant="mode === 'login' ? 'flat' : 'text'" 
+        :color="mode === 'login' ? 'surface' : 'transparent'"
+        :style="{ color: mode === 'login' ? 'rgb(var(--v-theme-on-surface))' : 'rgb(var(--v-theme-on-surface-variant))', borderRadius: '8px' }"
+        elevation="0"
+        @click="mode = 'login'"
+      >
+        {{ t('login') }}
+      </v-btn>
+      <v-btn 
+        class="text-body-2 font-weight-medium"
+        :variant="mode === 'signup' ? 'flat' : 'text'" 
+        :color="mode === 'signup' ? 'surface' : 'transparent'"
+        :style="{ color: mode === 'signup' ? 'rgb(var(--v-theme-on-surface))' : 'rgb(var(--v-theme-on-surface-variant))', borderRadius: '8px' }"
+        elevation="0"
+        @click="mode = 'signup'"
+      >
+        {{ t('signup') }}
+      </v-btn>
     </div>
 
+    <v-text-field v-model="username" :label="t('username')" class="mb-4 input-field" required hide-details="auto"
+      variant="outlined" rounded="lg" prepend-inner-icon="mdi-account" :disabled="loading" color="primary"></v-text-field>
 
-    <v-btn color="secondary" :loading="isSubmitting || loading" block class="login-btn mt-8" variant="flat" size="large"
-      :disabled="valid" type="submit">
-      <span class="login-btn-text">{{ t('login') }}</span>
+    <v-text-field v-model="password" :label="t('password')" required variant="outlined" rounded="lg" hide-details="auto"
+      :append-inner-icon="show1 ? 'mdi-eye-off' : 'mdi-eye'" :type="show1 ? 'text' : 'password'"
+      @click:append-inner="show1 = !show1" class="pwd-input" prepend-inner-icon="mdi-lock" :disabled="loading" color="primary"></v-text-field>
+
+    <v-text-field v-if="mode === 'signup'" v-model="confirmPassword" :label="t('confirmPassword')" required variant="outlined" rounded="lg" hide-details="auto"
+      :append-inner-icon="show2 ? 'mdi-eye-off' : 'mdi-eye'" :type="show2 ? 'text' : 'password'"
+      @click:append-inner="show2 = !show2" class="pwd-input mt-4" prepend-inner-icon="mdi-lock-check" :disabled="loading" color="primary"></v-text-field>
+
+    <div class="mt-2 mb-6">
+      <small style="color: rgb(var(--v-theme-on-surface-variant)); font-size: 12px; font-weight: 500;">{{ mode === 'signup' ? t('signupHint') : t('defaultHint') }}</small>
+    </div>
+
+    <v-btn :loading="isSubmitting || loading" block class="submit-btn" size="x-large"
+      :disabled="valid" type="submit" elevation="0">
+      <span class="submit-btn-text">{{ mode === 'signup' ? t('signup') : t('login') }}</span>
     </v-btn>
 
     <div v-if="errors.apiError" class="mt-4 error-container">
@@ -67,6 +109,15 @@ async function validate(values: any, { setErrors }: any) {
 
 <style lang="scss">
 .login-form {
+  .mode-switch {
+    display: flex;
+    gap: 8px;
+    background-color: rgba(var(--v-theme-on-surface), 0.04);
+    padding: 4px;
+    border-radius: 12px;
+    width: fit-content;
+  }
+  
   .v-text-field .v-field--active input {
     font-weight: 500;
   }
@@ -79,11 +130,11 @@ async function validate(values: any, { setErrors }: any) {
     }
 
     .v-field__outline {
-      opacity: 0.7;
+      opacity: 0.5;
     }
 
     &:hover .v-field__outline {
-      opacity: 0.9;
+      opacity: 0.8;
     }
 
     .v-field--focused .v-field__outline {
@@ -94,45 +145,33 @@ async function validate(values: any, { setErrors }: any) {
       padding-right: 8px;
       opacity: 0.7;
     }
-  }
-
-  .pwd-input {
-    position: relative;
-
-    .v-input__append {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      opacity: 0.7;
-
+    
+    .v-field__append-inner {
+      opacity: 0.6;
+      cursor: pointer;
       &:hover {
         opacity: 1;
       }
     }
   }
 
-  .login-btn {
-    margin-top: 12px;
-    height: 48px;
+  .submit-btn {
+    height: 52px;
     transition: all 0.3s ease;
-    letter-spacing: 0.5px;
-    border-radius: 8px !important;
+    border-radius: 12px !important;
+    background-color: rgb(var(--v-theme-on-surface)) !important;
+    color: rgb(var(--v-theme-surface)) !important;
 
     &:hover {
       transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(94, 53, 177, 0.2) !important;
+      box-shadow: 0 8px 20px rgba(var(--v-theme-on-surface), 0.15) !important;
     }
 
-    .login-btn-text {
+    .submit-btn-text {
       font-size: 1.05rem;
       font-weight: 500;
+      letter-spacing: normal;
     }
-  }
-
-  .hint-text {
-    color: var(--v-theme-secondaryText);
-    padding-left: 5px;
   }
 
   .error-container {

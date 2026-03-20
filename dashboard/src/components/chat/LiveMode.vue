@@ -281,7 +281,10 @@ function connectWebSocket(): Promise<void> {
         }
 
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const wsUrl = `${protocol}//localhost:6185/api/live_chat/ws?token=${encodeURIComponent(token)}`;
+        const wsUrlObject = new URL('/api/live_chat/ws', window.location.href);
+        wsUrlObject.protocol = protocol;
+        wsUrlObject.searchParams.set('token', token);
+        const wsUrl = wsUrlObject.toString();
 
         ws = new WebSocket(wsUrl);
 

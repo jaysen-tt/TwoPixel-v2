@@ -18,8 +18,11 @@ function mdiSubset() {
 }
 
 // https://vitejs.dev/config/
-export default defineConfig(({ command }) => ({
-  plugins: [
+export default defineConfig(({ command }) => {
+  const apiTarget = 'http://127.0.0.1:6185/';
+
+  return {
+    plugins: [
     // Only run MDI subsetting during production builds, skip in dev server
     ...(command === 'build' ? [mdiSubset()] : []),
     vue({
@@ -33,35 +36,37 @@ export default defineConfig(({ command }) => ({
       autoImport: true
     }),
     webfontDl()
-  ],
-  resolve: {
+    ],
+    resolve: {
     alias: {
       mermaid: 'mermaid/dist/mermaid.js',
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
-  },
-  css: {
+    },
+    css: {
     preprocessorOptions: {
       scss: {}
     }
-  },
-  build: {
+    },
+    build: {
     sourcemap: false,
     chunkSizeWarningLimit: 1024 * 1024 // Set the limit to 1 MB
-  },
-  optimizeDeps: {
+    },
+    optimizeDeps: {
     exclude: ['vuetify'],
     entries: ['./src/**/*.vue']
-  },
-  server: {
+    },
+    server: {
     host: '0.0.0.0',
     port: 3000,
+    strictPort: true,
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:6185/',
+        target: apiTarget,
         changeOrigin: true,
         ws: true
       }
     }
-  }
-}));
+    }
+  };
+});

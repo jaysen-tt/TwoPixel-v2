@@ -149,14 +149,35 @@ DEFAULT_CONFIG = {
     #   tools (transfer_to_*). remove_main_duplicate_tools can remove tools that are
     #   duplicated on subagents from the main LLM toolset.
     "subagent_orchestrator": {
-        "main_enable": False,
-        "remove_main_duplicate_tools": False,
+        "main_enable": True,
+        "remove_main_duplicate_tools": True,
         "router_system_prompt": (
-            "You are a task router. Your job is to chat naturally, recognize user intent, "
-            "and delegate work to the most suitable subagent using transfer_to_* tools. "
-            "Do not try to use domain tools yourself. If no subagent fits, respond directly."
+            "You are the TwoPixel main router. Handle simple requests directly. "
+            "For complex, multi-step, implementation-heavy, or long-running requests, "
+            "delegate via transfer_to_* tools. Prefer planner first for decomposition, "
+            "then executor for concrete delivery. Keep responses concise and action-oriented."
         ),
-        "agents": [],
+        "agents": [
+            {
+                "name": "planner",
+                "public_description": "Plan complex work into clear executable steps before implementation.",
+                "enabled": True,
+                "system_prompt": (
+                    "You are TwoPixel Planner. Break complex requests into minimal executable steps, "
+                    "identify risks, dependencies, and acceptance checks. Output a concise plan "
+                    "that can be executed immediately by another agent."
+                ),
+            },
+            {
+                "name": "executor",
+                "public_description": "Execute complex engineering tasks end-to-end with tools and verification.",
+                "enabled": True,
+                "system_prompt": (
+                    "You are TwoPixel Executor. Execute the plan end-to-end using available tools, "
+                    "validate outcomes, and return concrete results. Prefer direct action over discussion."
+                ),
+            },
+        ],
     },
     "provider_stt_settings": {
         "enable": False,
@@ -179,6 +200,25 @@ DEFAULT_CONFIG = {
             "method": "possibility_reply",
             "possibility_reply": 0.1,
             "whitelist": [],
+        },
+        "distillation": {
+            "enable": True,
+            "max_records": 1200,
+            "retrieval_top_k": 8,
+            "min_score": 1.0,
+        },
+        "heartbeat": {
+            "enable": False,
+            "every_minutes": 30,
+            "prompt": "Read current context and decide if anything needs attention. If no action is needed, reply HEARTBEAT_OK.",
+            "target": "last",
+            "ack_max_chars": 240,
+            "active_hours": {
+                "enable": False,
+                "start": "08:00",
+                "end": "23:00",
+                "timezone": "",
+            },
         },
     },
     "content_safety": {
@@ -267,7 +307,7 @@ CHAT_PROVIDER_TEMPLATE = {
 }
 
 """
-AstrBot v3 时代的配置元数据，目前仅承担以下功能：
+TwoPixel v3 时代的配置元数据，目前仅承担以下功能：
 
 1. 保存配置时，配置项的类型验证
 2. WebUI 展示提供商和平台适配器模版
@@ -390,7 +430,7 @@ CONFIG_METADATA_2 = {
                         "type": "telegram",
                         "enable": False,
                         "telegram_token": "your_bot_token",
-                        "start_message": "Hello, I'm AstrBot!",
+                        "start_message": "Hello, I'm TwoPixel!",
                         "telegram_api_base_url": "https://api.telegram.org/bot",
                         "telegram_file_base_url": "https://api.telegram.org/file/bot",
                         "telegram_command_register": True,
@@ -588,7 +628,7 @@ CONFIG_METADATA_2 = {
                     "wpp_active_message_poll": {
                         "description": "是否启用主动消息轮询",
                         "type": "bool",
-                        "hint": "只有当你发现微信消息没有按时同步到 AstrBot 时，才需要启用这个功能，默认不启用。",
+                        "hint": "只有当你发现微信消息没有按时同步到 TwoPixel 时，才需要启用这个功能，默认不启用。",
                     },
                     "wpp_active_message_poll_interval": {
                         "description": "主动消息轮询间隔",
@@ -674,12 +714,12 @@ CONFIG_METADATA_2 = {
                     "telegram_command_register": {
                         "description": "Telegram 命令注册",
                         "type": "bool",
-                        "hint": "启用后，AstrBot 将会自动注册 Telegram 命令。",
+                        "hint": "启用后，TwoPixel 将会自动注册 Telegram 命令。",
                     },
                     "telegram_command_auto_refresh": {
                         "description": "Telegram 命令自动刷新",
                         "type": "bool",
-                        "hint": "启用后，AstrBot 将会在运行时自动刷新 Telegram 命令。(单独设置此项无效)",
+                        "hint": "启用后，TwoPixel 将会在运行时自动刷新 Telegram 命令。(单独设置此项无效)",
                     },
                     "telegram_command_register_interval": {
                         "description": "Telegram 命令自动刷新间隔",
@@ -724,7 +764,7 @@ CONFIG_METADATA_2 = {
                     "ws_reverse_host": {
                         "description": "反向 Websocket 主机",
                         "type": "string",
-                        "hint": "AstrBot 将作为服务器端。",
+                        "hint": "TwoPixel 将作为服务器端。",
                     },
                     "ws_reverse_port": {
                         "description": "反向 Websocket 端口",
@@ -861,7 +901,7 @@ CONFIG_METADATA_2 = {
                     "unified_webhook_mode": {
                         "description": "统一 Webhook 模式",
                         "type": "bool",
-                        "hint": "Webhook 模式下使用 AstrBot 统一 Webhook 入口，无需单独开启端口。回调地址为 /api/platform/webhook/{webhook_uuid}。",
+                        "hint": "Webhook 模式下使用 TwoPixel 统一 Webhook 入口，无需单独开启端口。回调地址为 /api/platform/webhook/{webhook_uuid}。",
                     },
                     "webhook_uuid": {
                         "invisible": True,
@@ -1019,7 +1059,7 @@ CONFIG_METADATA_2 = {
                     "path_mapping": {
                         "type": "list",
                         "items": {"type": "string"},
-                        "hint": "此功能解决由于文件系统不一致导致路径不存在的问题。格式为 <原路径>:<映射路径>。如 `/app/.config/QQ:/var/lib/docker/volumes/xxxx/_data`。这样，当消息平台下发的事件中图片和语音路径以 `/app/.config/QQ` 开头时，开头被替换为 `/var/lib/docker/volumes/xxxx/_data`。这在 AstrBot 或者平台协议端使用 Docker 部署时特别有用。",
+                        "hint": "此功能解决由于文件系统不一致导致路径不存在的问题。格式为 <原路径>:<映射路径>。如 `/app/.config/QQ:/var/lib/docker/volumes/xxxx/_data`。这样，当消息平台下发的事件中图片和语音路径以 `/app/.config/QQ` 开头时，开头被替换为 `/var/lib/docker/volumes/xxxx/_data`。这在 TwoPixel 或者平台协议端使用 Docker 部署时特别有用。",
                     },
                 },
             },
@@ -1722,7 +1762,7 @@ CONFIG_METADATA_2 = {
                     "rerank_api_base": {
                         "description": "重排序模型 API Base URL",
                         "type": "string",
-                        "hint": "AstrBot 会在请求时在末尾加上 /v1/rerank。",
+                        "hint": "TwoPixel 会在请求时在末尾加上 /v1/rerank。",
                     },
                     "rerank_api_key": {
                         "description": "API Key",
@@ -2465,7 +2505,7 @@ CONFIG_METADATA_2 = {
                     "auto_save_history": {
                         "description": "由 Coze 管理对话记录",
                         "type": "bool",
-                        "hint": "启用后，将由 Coze 进行对话历史记录管理, 此时 AstrBot 本地保存的上下文不会生效(仅供浏览), 对 AstrBot 的上下文进行的操作也不会生效。如果为禁用, 则使用 AstrBot 管理上下文。",
+                        "hint": "启用后，将由 Coze 进行对话历史记录管理, 此时 TwoPixel 本地保存的上下文不会生效(仅供浏览), 对 TwoPixel 的上下文进行的操作也不会生效。如果为禁用, 则使用 TwoPixel 管理上下文。",
                     },
                 },
             },
@@ -2750,7 +2790,7 @@ CONFIG_METADATA_3 = {
         "metadata": {
             "agent_runner": {
                 "description": "Agent 执行方式",
-                "hint": "选择 AI 对话的执行器，默认为 AstrBot 内置 Agent 执行器，可使用 AstrBot 内的知识库、人格、工具调用功能。如果不打算接入 Dify、Coze、DeerFlow 等第三方 Agent 执行器，不需要修改此节。",
+                "hint": "选择 AI 对话的执行器，默认为 TwoPixel 内置 Agent 执行器，可使用 TwoPixel 内的知识库、人格、工具调用功能。如果不打算接入 Dify、Coze、DeerFlow 等第三方 Agent 执行器，不需要修改此节。",
                 "type": "object",
                 "items": {
                     "provider_settings.enable": {
@@ -2999,9 +3039,9 @@ CONFIG_METADATA_3 = {
                         "hint": "选择 Computer Use 运行环境。",
                     },
                     "provider_settings.computer_use_require_admin": {
-                        "description": "需要 AstrBot 管理员权限",
+                        "description": "需要 TwoPixel 管理员权限",
                         "type": "bool",
-                        "hint": "开启后，需要 AstrBot 管理员权限才能调用使用电脑能力。在平台配置->管理员中可添加管理员。使用 /sid 指令查看管理员 ID。",
+                        "hint": "开启后，需要 TwoPixel 管理员权限才能调用使用电脑能力。在平台配置->管理员中可添加管理员。使用 /sid 指令查看管理员 ID。",
                     },
                     "provider_settings.sandbox.booter": {
                         "description": "沙箱环境驱动器",
@@ -3129,7 +3169,7 @@ CONFIG_METADATA_3 = {
                     "provider_settings.proactive_capability.add_cron_tools": {
                         "description": "启用",
                         "type": "bool",
-                        "hint": "启用后，将会传递给 Agent 相关工具来实现主动型 Agent。你可以告诉 AstrBot 未来某个时间要做的事情，它将被定时触发然后执行任务。",
+                        "hint": "启用后，将会传递给 Agent 相关工具来实现主动型 Agent。你可以告诉 TwoPixel 未来某个时间要做的事情，它将被定时触发然后执行任务。",
                     },
                 },
                 "condition": {
@@ -3422,7 +3462,7 @@ CONFIG_METADATA_3 = {
                     "disable_builtin_commands": {
                         "description": "禁用自带指令",
                         "type": "bool",
-                        "hint": "禁用所有 AstrBot 的自带指令，如 help, provider, model 等。",
+                        "hint": "禁用所有 TwoPixel 的自带指令，如 help, provider, model 等。",
                     },
                 },
             },
@@ -3738,6 +3778,97 @@ CONFIG_METADATA_3 = {
                             "provider_ltm_settings.active_reply.enable": True,
                         },
                     },
+                    "provider_ltm_settings.distillation.enable": {
+                        "description": "启用记忆蒸馏 v1",
+                        "type": "bool",
+                    },
+                    "provider_ltm_settings.distillation.max_records": {
+                        "description": "蒸馏记忆最大条数",
+                        "type": "int",
+                        "condition": {
+                            "provider_ltm_settings.distillation.enable": True,
+                        },
+                    },
+                    "provider_ltm_settings.distillation.retrieval_top_k": {
+                        "description": "蒸馏召回条数",
+                        "type": "int",
+                        "condition": {
+                            "provider_ltm_settings.distillation.enable": True,
+                        },
+                    },
+                    "provider_ltm_settings.distillation.min_score": {
+                        "description": "蒸馏召回最小分数",
+                        "type": "float",
+                        "condition": {
+                            "provider_ltm_settings.distillation.enable": True,
+                        },
+                    },
+                    "provider_ltm_settings.heartbeat.enable": {
+                        "description": "启用轻量心跳",
+                        "type": "bool",
+                    },
+                    "provider_ltm_settings.heartbeat.every_minutes": {
+                        "description": "心跳间隔（分钟）",
+                        "type": "int",
+                        "condition": {
+                            "provider_ltm_settings.heartbeat.enable": True,
+                        },
+                    },
+                    "provider_ltm_settings.heartbeat.prompt": {
+                        "description": "心跳提示词",
+                        "type": "string",
+                        "condition": {
+                            "provider_ltm_settings.heartbeat.enable": True,
+                        },
+                    },
+                    "provider_ltm_settings.heartbeat.target": {
+                        "description": "心跳输出目标",
+                        "type": "string",
+                        "options": ["last", "none"],
+                        "labels": ["发送到当前会话", "静默不发送"],
+                        "condition": {
+                            "provider_ltm_settings.heartbeat.enable": True,
+                        },
+                    },
+                    "provider_ltm_settings.heartbeat.ack_max_chars": {
+                        "description": "HEARTBEAT_OK 附加字符上限",
+                        "type": "int",
+                        "condition": {
+                            "provider_ltm_settings.heartbeat.enable": True,
+                        },
+                    },
+                    "provider_ltm_settings.heartbeat.active_hours.enable": {
+                        "description": "启用心跳活跃时段",
+                        "type": "bool",
+                        "condition": {
+                            "provider_ltm_settings.heartbeat.enable": True,
+                        },
+                    },
+                    "provider_ltm_settings.heartbeat.active_hours.start": {
+                        "description": "活跃时段开始",
+                        "type": "string",
+                        "condition": {
+                            "provider_ltm_settings.heartbeat.enable": True,
+                            "provider_ltm_settings.heartbeat.active_hours.enable": True,
+                        },
+                    },
+                    "provider_ltm_settings.heartbeat.active_hours.end": {
+                        "description": "活跃时段结束",
+                        "type": "string",
+                        "condition": {
+                            "provider_ltm_settings.heartbeat.enable": True,
+                            "provider_ltm_settings.heartbeat.active_hours.enable": True,
+                        },
+                    },
+                    "provider_ltm_settings.heartbeat.active_hours.timezone": {
+                        "description": "活跃时段时区",
+                        "type": "string",
+                        "hint": "为空则使用系统本地时区。",
+                        "condition": {
+                            "provider_ltm_settings.heartbeat.enable": True,
+                            "provider_ltm_settings.heartbeat.active_hours.enable": True,
+                        },
+                    },
                 },
             },
         },
@@ -3761,7 +3892,7 @@ CONFIG_METADATA_3_SYSTEM = {
                     "t2i_endpoint": {
                         "description": "文本转图像服务 API 地址",
                         "type": "string",
-                        "hint": "为空时使用 AstrBot API 服务",
+                        "hint": "为空时使用 TwoPixel API 服务",
                         "condition": {
                             "t2i_strategy": "remote",
                         },
@@ -3858,7 +3989,7 @@ CONFIG_METADATA_3_SYSTEM = {
                     "callback_api_base": {
                         "description": "对外可达的回调接口地址",
                         "type": "string",
-                        "hint": "外部服务可能会通过 AstrBot 生成的回调链接（如文件下载链接）访问 AstrBot 后端。由于 AstrBot 无法自动判断部署环境中对外可达的主机地址（host），因此需要通过此配置项显式指定 “外部服务如何访问 AstrBot” 的地址。如 http://localhost:6185，https://example.com 等。",
+                        "hint": "外部服务可能会通过 TwoPixel 生成的回调链接（如文件下载链接）访问 TwoPixel 后端。由于 TwoPixel 无法自动判断部署环境中对外可达的主机地址（host），因此需要通过此配置项显式指定 “外部服务如何访问 TwoPixel” 的地址。如 http://localhost:6185，https://example.com 等。",
                     },
                     "timezone": {
                         "description": "时区",

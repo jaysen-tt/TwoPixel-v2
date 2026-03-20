@@ -139,6 +139,7 @@ class AstrBotDashboard:
         self.platform_route = PlatformRoute(self.context, core_lifecycle)
         self.backup_route = BackupRoute(self.context, db, core_lifecycle)
         self.live_chat_route = LiveChatRoute(self.context, db, core_lifecycle)
+        self.user_profile_route = UserProfileRoute(self.context)
 
         self.app.add_url_rule(
             "/api/plug/<path:subpath>",
@@ -348,14 +349,14 @@ class AstrBotDashboard:
                 f"错误：端口 {port} 已被占用\n"
                 f"占用信息: \n           {process_info}\n"
                 f"请确保：\n"
-                f"1. 没有其他 AstrBot 实例正在运行\n"
+                f"1. 没有其他 TwoPixel 实例正在运行\n"
                 f"2. 端口 {port} 没有被其他程序占用\n"
                 f"3. 如需使用其他端口，请修改配置文件",
             )
 
             raise Exception(f"端口 {port} 已被占用")
 
-        parts = [f"\n ✨✨✨\n  AstrBot v{VERSION} WebUI 已启动，可访问\n\n"]
+        parts = [f"\n ✨✨✨\n  TwoPixel v{VERSION} WebUI 已启动，可访问\n\n"]
         parts.append(f"   ➜  本地: {scheme}://localhost:{port}\n")
         for ip in ip_addr:
             parts.append(f"   ➜  网络: {scheme}://{ip}:{port}\n")
@@ -422,4 +423,4 @@ class AstrBotDashboard:
 
     async def shutdown_trigger(self) -> None:
         await self.shutdown_event.wait()
-        logger.info("AstrBot WebUI 已经被优雅地关闭")
+        logger.info("TwoPixel WebUI 已经被优雅地关闭")
