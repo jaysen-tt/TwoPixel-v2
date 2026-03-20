@@ -198,6 +198,14 @@ class LogManager:
         if cls._configured:
             return
 
+        if os.name == "nt":
+            stdout_reconfigure = getattr(sys.stdout, "reconfigure", None)
+            if callable(stdout_reconfigure):
+                stdout_reconfigure(encoding="utf-8", errors="replace")
+            stderr_reconfigure = getattr(sys.stderr, "reconfigure", None)
+            if callable(stderr_reconfigure):
+                stderr_reconfigure(encoding="utf-8", errors="replace")
+
         _loguru.remove()
         cls._console_sink_id = _loguru.add(
             sys.stdout,
