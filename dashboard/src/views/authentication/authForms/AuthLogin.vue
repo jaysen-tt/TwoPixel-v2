@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, useCssModule } from 'vue';
+import { ref } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { Form } from 'vee-validate';
 import { useModuleI18n } from '@/i18n/composables';
@@ -14,10 +14,14 @@ const confirmPassword = ref('');
 const username = ref('');
 const loading = ref(false);
 const mode = ref<'login' | 'signup'>('login');
+const forgotSending = ref(false);
+const authMessage = ref('');
+const authMessageType = ref<'success' | 'error'>('error');
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 async function validate(values: any, { setErrors }: any) {
   loading.value = true;
+  authMessage.value = '';
 
   const normalizedUsername = String(username.value || '').trim();
   const isEmailLogin = normalizedUsername.includes('@');
@@ -49,6 +53,27 @@ async function validate(values: any, { setErrors }: any) {
   }).catch((err) => {
     setErrors({ apiError: err });
     loading.value = false;
+  });
+}
+
+async function onForgotPassword() {
+  const normalizedUsername = String(username.value || '').trim();
+  const isEmail = normalizedUsername.includes('@');
+  if (!isEmail) {
+    authMessageType.value = 'error';
+    authMessage.value = t('forgotPasswordEmailRequired');
+    return;
+  }
+  forgotSending.value = true;
+  const authStore = useAuthStore();
+  authStore.forgotPassword(normalizedUsername).then((message) => {
+    authMessageType.value = 'success';
+    authMessage.value = String(message || '');
+    forgotSending.value = false;
+  }).catch((err) => {
+    authMessageType.value = 'error';
+    authMessage.value = String(err);
+    forgotSending.value = false;
   });
 }
 
@@ -86,6 +111,19 @@ async function validate(values: any, { setErrors }: any) {
       :append-inner-icon="show1 ? 'mdi-eye-off' : 'mdi-eye'" :type="show1 ? 'text' : 'password'"
       @click:append-inner="show1 = !show1" class="pwd-input" prepend-inner-icon="mdi-lock" :disabled="loading" color="primary"></v-text-field>
 
+    <div v-if="mode === 'login'" class="mt-2 d-flex justify-end">
+      <v-btn
+        variant="text"
+        size="small"
+        color="primary"
+        :loading="forgotSending"
+        :disabled="loading || forgotSending"
+        @click="onForgotPassword"
+      >
+        {{ t('forgotPassword') }}
+      </v-btn>
+    </div>
+
     <v-text-field v-if="mode === 'signup'" v-model="confirmPassword" :label="t('confirmPassword')" required variant="outlined" rounded="lg" hide-details="auto"
       :append-inner-icon="show2 ? 'mdi-eye-off' : 'mdi-eye'" :type="show2 ? 'text' : 'password'"
       @click:append-inner="show2 = !show2" class="pwd-input mt-4" prepend-inner-icon="mdi-lock-check" :disabled="loading" color="primary"></v-text-field>
@@ -98,6 +136,12 @@ async function validate(values: any, { setErrors }: any) {
       :disabled="valid" type="submit" elevation="0">
       <span class="submit-btn-text">{{ mode === 'signup' ? t('signup') : t('login') }}</span>
     </v-btn>
+
+    <div v-if="authMessage" class="mt-4 error-container">
+      <v-alert :color="authMessageType" variant="tonal" icon="mdi-alert-circle" border="start">
+        {{ authMessage }}
+      </v-alert>
+    </div>
 
     <div v-if="errors.apiError" class="mt-4 error-container">
       <v-alert color="error" variant="tonal" icon="mdi-alert-circle" border="start">

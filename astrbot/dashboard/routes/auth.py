@@ -18,6 +18,7 @@ class AuthRoute(Route):
         self.routes = {
             "/auth/login": ("POST", self.login),
             "/auth/signup": ("POST", self.signup),
+            "/auth/forgot-password": ("POST", self.forgot_password),
             "/auth/account/edit": ("POST", self.edit_account),
         }
         self.register_routes()
@@ -75,6 +76,19 @@ class AuthRoute(Route):
         if access_token:
             result["token"] = self.generate_jwt(email)
         return Response().ok(result, "注册成功").__dict__
+
+    async def forgot_password(self):
+        post_data = await request.json
+        email = str(post_data.get("email", "")).strip().lower()
+        if "@" not in email:
+            return Response().error("请输入有效邮箱").__dict__
+        ok = await self._supabase_send_reset_email(email)
+        if not ok:
+            return Response().error("重置邮件发送失败，请稍后重试").__dict__
+        return Response().ok(
+            {"email": email},
+            "已发送重置邮件，请检查收件箱",
+        ).__dict__
 
     def _supabase_base(self) -> tuple[str, str]:
         supabase_url = str(
@@ -144,6 +158,35 @@ class AuthRoute(Route):
                     return data if isinstance(data, dict) else None
         except Exception:
             return None
+
+    async def _supabase_send_reset_email(self, email: str) -> bool:
+        supabase_url, supabase_anon_key = self._supabase_base()
+        if not supabase_url or not supabase_anon_key:
+            return False
+        endpoint = f"{supabase_url}/auth/v1/recover"
+        headers = {
+            "Content-Type": "application/json",
+            "apikey": supabase_anon_key,
+        }
+        redirect_to = str(
+            os.environ.get("TWOPIXEL_SUPABASE_RESET_REDIRECT")
+            or os.environ.get("TWOPIXEL_DASHBOARD_URL")
+            or "",
+        ).strip()
+        payload = {"email": email}
+        if redirect_to:
+            payload["redirect_to"] = redirect_to
+        try:
+            timeout = aiohttp.ClientTimeout(total=8)
+            async with aiohttp.ClientSession(timeout=timeout) as session:
+                async with session.post(
+                    endpoint,
+                    json=payload,
+                    headers=headers,
+                ) as resp:
+                    return resp.status in (200, 201)
+        except Exception:
+            return False
 
     async def edit_account(self):
         return Response().error("本地账号已禁用，请使用 Supabase 账户").__dict__
