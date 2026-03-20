@@ -299,8 +299,6 @@ async def _validate_neo_connectivity(
     return None
 
 
-
-
 def _mask_provider_sources(config_dict: dict) -> dict:
     """Mask API keys in provider sources before sending to frontend to prevent leakage."""
     if not isinstance(config_dict, dict):
