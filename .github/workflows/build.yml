@@ -58,7 +58,10 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           src = Path("requirements.txt").read_text(encoding="utf-8").splitlines()
-          skip_prefixes = ("faiss-cpu",)
+          skip_prefixes = (
+            "faiss-cpu",
+            "xinference-client",
+          )
           filtered = []
           for line in src:
             raw = line.strip()
