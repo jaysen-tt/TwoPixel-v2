@@ -4,6 +4,25 @@ import axios from 'axios';
 
 const BYPASS_LOGIN = false;
 
+type AuthEnvelope = {
+  status?: string;
+  message?: string;
+  data?: Record<string, unknown> | null;
+};
+
+function extractAuthData(raw: unknown): Record<string, unknown> {
+  if (!raw || typeof raw !== 'object') return {};
+  const envelope = raw as AuthEnvelope;
+  if (envelope.data && typeof envelope.data === 'object') {
+    return envelope.data as Record<string, unknown>;
+  }
+  const level2 = (raw as any)?.data;
+  if (level2 && typeof level2 === 'object' && level2.data && typeof level2.data === 'object') {
+    return level2.data as Record<string, unknown>;
+  }
+  return {};
+}
+
 export const useAuthStore = defineStore({
   id: 'auth',
   state: () => ({
@@ -19,12 +38,12 @@ export const useAuthStore = defineStore({
           password: password
         });
 
-        const payload = res?.data ?? {};
+        const payload = (res?.data ?? {}) as AuthEnvelope;
         if (payload?.status === 'error') {
           return Promise.reject(payload?.message || '登录失败，请稍后重试');
         }
 
-        const data = payload?.data ?? {};
+        const data = extractAuthData(payload);
         const token = String(data?.token || '').trim();
         if (!token) {
           return Promise.reject(payload?.message || '登录失败：服务端未返回有效令牌');
@@ -48,11 +67,11 @@ export const useAuthStore = defineStore({
     async signup(email: string, password: string): Promise<void> {
       try {
         const res = await axios.post('/api/auth/signup', { email, password });
-        const payload = res?.data ?? {};
+        const payload = (res?.data ?? {}) as AuthEnvelope;
         if (payload?.status === 'error') {
           return Promise.reject(payload?.message || '注册失败，请稍后重试');
         }
-        const data = payload?.data || {};
+        const data = extractAuthData(payload);
         const dashboardToken = String(data.token || '').trim();
         if (!dashboardToken) {
           return Promise.reject('注册成功，请先去邮箱完成验证，再返回登录。');
@@ -60,8 +79,8 @@ export const useAuthStore = defineStore({
         this.username = String(data.username || email).trim();
         localStorage.setItem('user', this.username);
         localStorage.setItem('token', dashboardToken);
-        localStorage.setItem('supabase-access-token', data.supabase_access_token || '');
-        localStorage.setItem('supabase-refresh-token', data.supabase_refresh_token || '');
+        localStorage.setItem('supabase-access-token', String(data.supabase_access_token || ''));
+        localStorage.setItem('supabase-refresh-token', String(data.supabase_refresh_token || ''));
         localStorage.setItem('supabase-user', JSON.stringify(data.supabase_user || {}));
         router.push(this.returnUrl || '/dashboard/default');
       } catch (error) {
