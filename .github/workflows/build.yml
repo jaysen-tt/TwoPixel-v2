@@ -88,6 +88,8 @@ jobs:
 
       - name: Smoke Test Backend Binary
         run: |
+          export PYTHONUTF8=1
+          export PYTHONIOENCODING=utf-8
           ./dist/twopixel-backend --help >/tmp/twopixel_backend_help.txt
           head -n 20 /tmp/twopixel_backend_help.txt
         shell: bash
