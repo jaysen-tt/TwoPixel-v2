@@ -16,7 +16,8 @@ type LoginDebugPayload = {
   normalizedStatus: string;
   normalizedMessage: string;
   normalizedDataKeys: string[];
-  rawResponse: unknown;
+  rawResponseType: string;
+  rawResponseSnippet: string;
   timestamp: string;
 };
 
@@ -66,6 +67,21 @@ function setLoginDebug(debug: LoginDebugPayload): void {
   localStorage.setItem('twopixel-login-debug', text);
 }
 
+function summarizeRawResponse(raw: unknown): { rawResponseType: string; rawResponseSnippet: string } {
+  const rawType = Array.isArray(raw) ? 'array' : typeof raw;
+  let rawText = '';
+  try {
+    rawText = JSON.stringify(raw);
+  } catch {
+    rawText = String(raw || '');
+  }
+  if (!rawText) rawText = '';
+  return {
+    rawResponseType: rawType,
+    rawResponseSnippet: rawText.slice(0, 400)
+  };
+}
+
 export const useAuthStore = defineStore({
   id: 'auth',
   state: () => ({
@@ -89,7 +105,7 @@ export const useAuthStore = defineStore({
             normalizedStatus: payload.status,
             normalizedMessage: payload.message,
             normalizedDataKeys: Object.keys(payload.data || {}),
-            rawResponse: res?.data ?? null,
+            ...summarizeRawResponse(res?.data ?? null),
             timestamp: new Date().toISOString()
           };
           setLoginDebug(debug);
@@ -108,7 +124,7 @@ export const useAuthStore = defineStore({
             normalizedStatus: payload.status,
             normalizedMessage: payload.message,
             normalizedDataKeys: Object.keys(payload.data || {}),
-            rawResponse: res?.data ?? null,
+            ...summarizeRawResponse(res?.data ?? null),
             timestamp: new Date().toISOString()
           };
           setLoginDebug(debug);
@@ -137,7 +153,7 @@ export const useAuthStore = defineStore({
           normalizedStatus: '',
           normalizedMessage: '',
           normalizedDataKeys: [],
-          rawResponse: (error as any)?.response?.data ?? null,
+          ...summarizeRawResponse((error as any)?.response?.data ?? null),
           timestamp: new Date().toISOString()
         };
         setLoginDebug(debug);

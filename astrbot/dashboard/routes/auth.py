@@ -198,8 +198,11 @@ class AuthRoute(Route):
             "exp": datetime.datetime.now(datetime.timezone.utc)
             + datetime.timedelta(days=7),
         }
-        jwt_token = self.config["dashboard"].get("jwt_secret", None)
+        dashboard_cfg = self.config.get("dashboard", {})
+        jwt_token = dashboard_cfg.get("jwt_secret", None)
         if not jwt_token:
-            raise ValueError("JWT secret is not set in the cmd_config.")
+            jwt_token = os.urandom(32).hex()
+            dashboard_cfg["jwt_secret"] = jwt_token
+            self.config["dashboard"] = dashboard_cfg
         token = jwt.encode(payload, jwt_token, algorithm="HS256")
         return token
