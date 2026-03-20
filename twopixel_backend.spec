@@ -9,8 +9,9 @@ if not os.path.exists('data'):
 
 # 2. Bundle full Python env + toolchains
 hidden_imports = [
-    'ast', 'asyncio', 'logging', 'json', 'yaml', 'aiohttp', 
-    'astrbot', 'astrbot.core', 'astrbot.dashboard'
+    'ast', 'asyncio', 'logging', 'json', 'yaml', 'aiohttp',
+    'astrbot', 'astrbot.core', 'astrbot.dashboard',
+    'aiosqlite', 'sqlalchemy.dialects.sqlite.aiosqlite'
 ]
 
 if hasattr(sys, 'stdlib_module_names'):
@@ -18,7 +19,7 @@ if hasattr(sys, 'stdlib_module_names'):
     stdlib_modules = [m for m in sys.stdlib_module_names if not m.startswith('_')]
     hidden_imports.extend(stdlib_modules)
 
-for pkg in ['pip', 'setuptools', 'wheel']:
+for pkg in ['pip', 'setuptools', 'wheel', 'aiosqlite']:
     try:
         hidden_imports.extend(collect_submodules(pkg))
     except Exception:

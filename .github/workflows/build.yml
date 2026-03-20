@@ -86,6 +86,12 @@ jobs:
           uv run pyinstaller twopixel_backend.spec
         shell: bash
 
+      - name: Smoke Test Backend Binary
+        run: |
+          ./dist/twopixel-backend --help >/tmp/twopixel_backend_help.txt
+          head -n 20 /tmp/twopixel_backend_help.txt
+        shell: bash
+
       - name: Copy Backend to Tauri bin
         run: |
           mkdir -p dashboard/src-tauri/bin
