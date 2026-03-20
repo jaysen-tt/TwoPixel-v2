@@ -10,6 +10,16 @@ type AuthEnvelope = {
   data?: Record<string, unknown> | null;
 };
 
+type LoginDebugPayload = {
+  stage: string;
+  inputEmail: string;
+  normalizedStatus: string;
+  normalizedMessage: string;
+  normalizedDataKeys: string[];
+  rawResponse: unknown;
+  timestamp: string;
+};
+
 function asRecord(value: unknown): Record<string, unknown> | null {
   if (!value || typeof value !== 'object') return null;
   return value as Record<string, unknown>;
@@ -51,6 +61,11 @@ function normalizeAuthPayload(raw: unknown): { status: string; message: string; 
   };
 }
 
+function setLoginDebug(debug: LoginDebugPayload): void {
+  const text = JSON.stringify(debug, null, 2);
+  localStorage.setItem('twopixel-login-debug', text);
+}
+
 export const useAuthStore = defineStore({
   id: 'auth',
   state: () => ({
@@ -68,13 +83,39 @@ export const useAuthStore = defineStore({
 
         const payload = normalizeAuthPayload(res?.data);
         if (payload.status === 'error') {
-          return Promise.reject(payload.message || '登录失败，请稍后重试');
+          const debug: LoginDebugPayload = {
+            stage: 'status_error',
+            inputEmail: username,
+            normalizedStatus: payload.status,
+            normalizedMessage: payload.message,
+            normalizedDataKeys: Object.keys(payload.data || {}),
+            rawResponse: res?.data ?? null,
+            timestamp: new Date().toISOString()
+          };
+          setLoginDebug(debug);
+          return Promise.reject({
+            message: payload.message || '登录失败，请稍后重试',
+            debug
+          });
         }
 
         const data = payload.data;
         const token = String(data?.token || '').trim();
         if (!token) {
-          return Promise.reject(payload.message || '登录失败：服务端未返回有效令牌');
+          const debug: LoginDebugPayload = {
+            stage: 'missing_token',
+            inputEmail: username,
+            normalizedStatus: payload.status,
+            normalizedMessage: payload.message,
+            normalizedDataKeys: Object.keys(payload.data || {}),
+            rawResponse: res?.data ?? null,
+            timestamp: new Date().toISOString()
+          };
+          setLoginDebug(debug);
+          return Promise.reject({
+            message: payload.message || '登录失败：服务端未返回有效令牌',
+            debug
+          });
         }
 
         this.username = String(data?.username || username).trim();
@@ -87,9 +128,20 @@ export const useAuthStore = defineStore({
         router.push(this.returnUrl || '/dashboard/default');
       } catch (error) {
         const message = (error as any)?.response?.data?.message
+          || (error as any)?.message?.message
           || (error as any)?.message
           || '登录失败，请检查账号或网络';
-        return Promise.reject(message);
+        const debug = (error as any)?.debug || {
+          stage: 'catch',
+          inputEmail: username,
+          normalizedStatus: '',
+          normalizedMessage: '',
+          normalizedDataKeys: [],
+          rawResponse: (error as any)?.response?.data ?? null,
+          timestamp: new Date().toISOString()
+        };
+        setLoginDebug(debug);
+        return Promise.reject({ message, debug });
       }
     },
     async signup(email: string, password: string): Promise<void> {

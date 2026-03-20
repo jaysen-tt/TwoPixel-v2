@@ -17,6 +17,17 @@ const mode = ref<'login' | 'signup'>('login');
 const forgotSending = ref(false);
 const authMessage = ref('');
 const authMessageType = ref<'success' | 'error'>('error');
+const showDebugDialog = ref(false);
+const loginDebugText = ref('');
+
+function formatDebug(err: any): string {
+  const debug = err?.debug || {};
+  const message = String(err?.message || err || '');
+  return JSON.stringify({
+    message,
+    debug
+  }, null, 2);
+}
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 async function validate(values: any, { setErrors }: any) {
@@ -52,7 +63,10 @@ async function validate(values: any, { setErrors }: any) {
     console.log(res);
     loading.value = false;
   }).catch((err) => {
-    setErrors({ apiError: err });
+    const message = String(err?.message || err || '');
+    setErrors({ apiError: message });
+    loginDebugText.value = formatDebug(err);
+    showDebugDialog.value = true;
     loading.value = false;
   });
 }
@@ -150,6 +164,24 @@ async function onForgotPassword() {
       </v-alert>
     </div>
   </Form>
+  <v-dialog v-model="showDebugDialog" max-width="860">
+    <v-card rounded="xl">
+      <v-card-title class="text-h6 font-weight-bold">登录响应实时诊断弹窗</v-card-title>
+      <v-card-text>
+        <v-textarea
+          v-model="loginDebugText"
+          rows="12"
+          variant="outlined"
+          readonly
+          auto-grow
+          hide-details
+        />
+      </v-card-text>
+      <v-card-actions class="justify-end">
+        <v-btn color="primary" variant="flat" @click="showDebugDialog = false">关闭</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <style lang="scss">
